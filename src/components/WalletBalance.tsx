@@ -1,4 +1,4 @@
-import { Wallet } from "lucide-react";
+import {Wallet, Copy} from 'lucide-react';
 
 export function WalletBalance() {
   return (
@@ -7,7 +7,14 @@ export function WalletBalance() {
         <Wallet className="h-5 w-5 text-primary" />
       </div>
       <div>
-        <div className="text-xs text-muted-foreground">Wallet Balance</div>
+        {/* Wallet Address */}
+            <div className="flex items-center gap-3">
+              <span className="text-sm text-muted-foreground">7x8k...mN3p</span>
+              <button className="text-muted-foreground hover:text-foreground">
+                <Copy className="h-4 w-4" />
+              </button>
+            </div>
+        {/* Wallet Balance */}
         <div className="text-lg font-bold">SOL 105,000</div>
       </div>
     </div>
