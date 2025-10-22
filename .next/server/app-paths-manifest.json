@@ -1,7 +1,0 @@
-{
-  "/dashboard/page": "app/dashboard/page.js",
-  "/contribute/page": "app/contribute/page.js",
-  "/profile/page": "app/profile/page.js",
-  "/leaderboard/page": "app/leaderboard/page.js",
-  "/referrals/page": "app/referrals/page.js"
-}
