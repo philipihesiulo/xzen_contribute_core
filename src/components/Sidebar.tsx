@@ -15,7 +15,11 @@ const navigation = [
   { name: "Profile", href: "/profile", icon: User },
 ];
 
-export function Sidebar() {
+interface SidebarProps {
+  onLinkClick?: () => void;
+}
+
+export function Sidebar({ onLinkClick }: SidebarProps) {
   const pathname = usePathname();
 
   return (
@@ -31,6 +35,7 @@ export function Sidebar() {
           <Link
             key={item.name}
             href={item.href}
+            onClick={onLinkClick}
             className={cn(
               "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
               pathname === item.href

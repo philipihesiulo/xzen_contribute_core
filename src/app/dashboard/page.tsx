@@ -3,6 +3,7 @@ import { Card } from "@/components/ui/card";
 import { Flame, Calendar, Award, Share2, ChevronDown } from "lucide-react";
 import Image from "next/image";
 import DashboardLayout from "../dashboard-layout";
+import { RecentContributions } from "@/components/RecentContributions";
 
 const stats = [
   {
@@ -23,13 +24,7 @@ const stats = [
   },
 ];
 
-const contributions = [
-  { token: "SOL", contract: "SPL Token", amount: "0.5", date: "Oct 3", points: "50 XZN", bonus: "+10%" },
-  { token: "SOL", contract: "SPL Token", amount: "0.5", date: "Oct 3", points: "50 XZN", bonus: "+10%" },
-  { token: "SOL", contract: "SPL Token", amount: "0.5", date: "Oct 3", points: "50 XZN", bonus: "+10%" },
-  { token: "SOL", contract: "SPL Token", amount: "0.5", date: "Oct 3", points: "50 XZN", bonus: "+10%" },
-  { token: "SOL", contract: "SPL Token", amount: "0.5", date: "Oct 3", points: "50 XZN", bonus: "+10%" },
-];
+
 
 const leaderboard = [
   { rank: 1, username: "x09e...756o", points: "500 XZN" },
@@ -43,12 +38,12 @@ export default function Dashboard() {
   return (
     <DashboardLayout pageTitle="Dashboard" noBackButton={true}>
       {/* Main Content Grid */}
-      <div className="grid gap-6 lg:grid-cols-3">
+      <div className="flex flex-col gap-6">
         {/* Left Column - Points and Contributions */}
-        <div className="lg:col-span-2 space-y-6">
+        <div className="space-y-6">
           {/* Total Points */}
           <Card className="bg-card border-border p-6">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col md:flex-row items-center justify-between gap-4">
               <div className="flex items-center gap-3">
                 <div className="flex h-12 w-12 items-center justify-center rounded-lg">
                   <Image src="/medal.svg" alt="Medal Icon" width={50} height={50} className="text-primary" />
@@ -58,12 +53,12 @@ export default function Dashboard() {
                   <h2 className="text-3xl font-bold">3,420 XZN</h2>
                 </div>
               </div>
-              <Button className="gradient-primary">Contribute Now</Button>
+              <Button className="gradient-primary w-full md:w-auto">Contribute Now</Button>
             </div>
           </Card>
 
           {/* Stats Cards */}
-          <div className="mb-8 grid gap-4 md:grid-cols-3">
+          <div className="mb-8 grid gap-4 lg:grid-cols-3">
             {stats.map((stat, index) => (
               <Card key={index} className="bg-card bg-white/10 border-border p-2 pt-6 pb-6">
                 <div className="flex items-start gap-4">
@@ -87,46 +82,10 @@ export default function Dashboard() {
             ))}
           </div>
 
+          
+
           {/* Recent Contributions */}
-          <Card className="bg-card border-border">
-            <div className="flex items-center justify-between border-b border-border p-6">
-              <h3 className="text-lg font-semibold">My Recent Contributions</h3>
-              <button className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground">
-                All <ChevronDown className="h-4 w-4" />
-              </button>
-            </div>
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead className="border-b border-border">
-                  <tr className="text-left text-sm text-muted-foreground">
-                    <th className="p-4 font-medium">Token</th>
-                    <th className="p-4 font-medium">Contract Address</th>
-                    <th className="p-4 font-medium">Amount</th>
-                    <th className="p-4 font-medium">Date</th>
-                    <th className="p-4 font-medium">Points Earned</th>
-                    <th className="p-4 font-medium">Streak Bonus</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {contributions.map((item, index) => (
-                    <tr key={index} className="border-b border-border last:border-0">
-                      <td className="p-4">
-                        <div className="flex items-center gap-2">
-                          <div className="h-6 w-6 rounded-full bg-primary/20" />
-                          <span className="font-medium">{item.token}</span>
-                        </div>
-                      </td>
-                      <td className="p-4 text-muted-foreground">{item.contract}</td>
-                      <td className="p-4">{item.amount}</td>
-                      <td className="p-4 text-muted-foreground">{item.date}</td>
-                      <td className="p-4 font-medium">{item.points}</td>
-                      <td className="p-4 text-accent">{item.bonus}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </Card>
+          <RecentContributions />
         </div>
 
         {/* Right Column - Referral and Leaderboard */}
@@ -138,7 +97,7 @@ export default function Dashboard() {
               <div className="font-bold">Alex004</div>
               <div className="text-xs text-muted-foreground">xzen.app/?code=alex004</div>
             </div>
-            <Button className="gradient-primary w-full mb-4">
+            <Button className="gradient-primary w-full md:w-auto mb-4">
               <Share2 className="mr-2 h-4 w-4" />
               Share Code
             </Button>

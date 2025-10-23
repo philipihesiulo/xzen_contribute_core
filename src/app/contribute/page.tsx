@@ -1,12 +1,9 @@
 "use client";
 
-
-
-
-
-import { Button } from "@/components/ui/button";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { Card } from "@/components/ui/card";
-import { RefreshCw, ExternalLink, ArrowLeft, Copy } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { ExternalLink } from "lucide-react";
 import { useState } from "react";
 import DashboardLayout from "../dashboard-layout";
 import { Input } from "@/components/ui/input";
@@ -27,8 +24,10 @@ const selectedTokens = [
   { id: 3, name: "Jito", amount: 100, reward: "+50 XZN" },
 ];
 
+
 export default function Contribute() {
   const [contribution, setContribution] = useState(selectedTokens);
+  const isMobile = useIsMobile();
 
   const handleAmountChange = (id: number, newAmount: number) => {
     setContribution(prev =>
@@ -58,7 +57,7 @@ export default function Contribute() {
         </Button>
       </div>*/}
 
-      <div className="grid gap-6 lg:grid-cols-3">
+      <div className="lg:grid gap-6 lg:grid-cols-3">
         {/* Token Selection */}
         <div className="lg:col-span-2">
           <Card className="bg-card border-border">
@@ -69,49 +68,89 @@ export default function Contribute() {
               </button>
             </div>
             <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead className="border-b border-border">
-                  <tr className="text-left text-sm text-muted-foreground">
-                    <th className="p-4 font-medium">Token</th>
-                    <th className="p-4 font-medium">Balance</th>
-                    <th className="p-4 font-medium">Contract Address</th>
-                    <th className="p-4 font-medium">Est. XZN Reward</th>
-                    <th className="p-4 font-medium">Action</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {tokens.map((token, index) => (
-                    <tr key={index} className="border-b border-border last:border-0">
-                      <td className="p-4">
-                        <div className="flex items-center gap-2">
-                          <div className="h-8 w-8 rounded-full bg-primary/20" />
-                          <span className="font-medium">{token.symbol}</span>
-                        </div>
-                      </td>
-                      <td className="p-4">{token.balance}</td>
-                      <td className="p-4 text-muted-foreground">{token.contract}</td>
-                      <td className="p-4 font-medium text-accent">{token.reward}</td>
-                      <td className="p-4">
-                        {token.status === "add" ? (
-                          <Button size="sm" className="gradient-primary">
-                            Add
-                          </Button>
-                        ) : (
-                          <Button size="sm" variant="outline">
-                            Remove
-                          </Button>
-                        )}
-                      </td>
+              {isMobile ? (
+                <table className="w-full">
+                  <thead className="border-b border-border">
+                    <tr className="text-left text-sm text-muted-foreground">
+                      <th className="p-4 font-medium">Token</th>
+                      <th className="p-4 font-medium">Action</th>
+                      <th className="p-4 font-medium">Balance</th>
+                      <th className="p-4 font-medium">Contract Address</th>
+                      <th className="p-4 font-medium">Est. XZN Reward</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody>
+                    {tokens.map((token, index) => (
+                      <tr key={index} className="border-b border-border last:border-0">
+                        <td className="p-4">
+                          <div className="flex items-center gap-2">
+                            <div className="h-8 w-8 rounded-full bg-primary/20" />
+                            <span className="font-medium">{token.symbol}</span>
+                          </div>
+                        </td>
+                        <td className="p-4">
+                          {token.status === "add" ? (
+                            <Button size="sm" className="gradient-primary">
+                              Add
+                            </Button>
+                          ) : (
+                            <Button size="sm" variant="outline">
+                              Remove
+                            </Button>
+                          )}
+                        </td>
+                        <td className="p-4">{token.balance}</td>
+                        <td className="p-4 text-muted-foreground">{token.contract}</td>
+                        <td className="p-4 font-medium text-accent">{token.reward}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              ) : (
+                <table className="w-full">
+                  <thead className="border-b border-border">
+                    <tr className="text-left text-sm text-muted-foreground">
+                      <th className="p-4 font-medium">Token</th>
+                      <th className="p-4 font-medium">Balance</th>
+                      <th className="p-4 font-medium">Contract Address</th>
+                      <th className="p-4 font-medium">Est. XZN Reward</th>
+                      <th className="p-4 font-medium">Action</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {tokens.map((token, index) => (
+                      <tr key={index} className="border-b border-border last:border-0">
+                        <td className="p-4">
+                          <div className="flex items-center gap-2">
+                            <div className="h-8 w-8 rounded-full bg-primary/20" />
+                            <span className="font-medium">{token.symbol}</span>
+                          </div>
+                        </td>
+                        <td className="p-4">{token.balance}</td>
+                        <td className="p-4 text-muted-foreground">{token.contract}</td>
+                        <td className="p-4 font-medium text-accent">{token.reward}</td>
+                        <td className="p-4">
+                          {token.status === "add" ? (
+                            <Button size="sm" className="gradient-primary">
+                              Add
+                            </Button>
+                          ) : (
+                            <Button size="sm" variant="outline">
+                              Remove
+                            </Button>
+                          )}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              )}
             </div>
           </Card>
         </div>
 
         {/* Contribution Preview */}
-        <div>
+        <div className="mt-6 lg:mt-0">
           <Card className="bg-card border-border p-6">
             <h2 className="mb-6 text-lg font-semibold">Contribution Preview</h2>
             
