@@ -20,7 +20,7 @@ export default function Leaderboard() {
       pageDescription="See how your contributions rank across the community"
     >
       {/* Time Period Tabs */}
-      <div className="">
+      <div>
         <div className="mb-6 overflow-x-auto whitespace-nowrap flex gap-2">
         {tabs.map((tab, index) => (
           <button

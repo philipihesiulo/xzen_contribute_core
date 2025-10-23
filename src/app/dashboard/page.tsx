@@ -38,9 +38,9 @@ export default function Dashboard() {
   return (
     <DashboardLayout pageTitle="Dashboard" noBackButton={true}>
       {/* Main Content Grid */}
-      <div className="flex flex-col gap-6">
+      <div className="lg:grid gap-6 lg:grid-cols-3">
         {/* Left Column - Points and Contributions */}
-        <div className="space-y-6">
+        <div className="lg:col-span-2">
           {/* Total Points */}
           <Card className="bg-card border-border p-6">
             <div className="flex flex-col md:flex-row items-center justify-between gap-4">
@@ -58,7 +58,7 @@ export default function Dashboard() {
           </Card>
 
           {/* Stats Cards */}
-          <div className="mb-8 grid gap-4 lg:grid-cols-3">
+          <div className="mb-8 grid gap-4 lg:grid-cols-3 mt-6 mb-6">
             {stats.map((stat, index) => (
               <Card key={index} className="bg-card bg-white/10 border-border p-2 pt-6 pb-6">
                 <div className="flex items-start gap-4">
@@ -81,15 +81,12 @@ export default function Dashboard() {
               </Card>
             ))}
           </div>
-
-          
-
           {/* Recent Contributions */}
           <RecentContributions />
         </div>
 
         {/* Right Column - Referral and Leaderboard */}
-        <div className="space-y-6">
+        <div className="mt-6 lg:mt-0">
           {/* Referral Summary */}
           <Card className="bg-card border-border p-6">
             <h3 className="mb-4 text-lg font-semibold">Referral Summary</h3>
@@ -118,7 +115,7 @@ export default function Dashboard() {
           </Card>
 
           {/* Leaderboard Preview */}
-          <Card className="bg-card border-border">
+          <Card className="bg-card border-border mt-6">
             <div className="flex items-center justify-between border-b border-border p-6">
               <h3 className="text-lg font-semibold">Leaderboard</h3>
               <button className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground">
