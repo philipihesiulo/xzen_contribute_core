@@ -2,30 +2,41 @@
 
 
 
+
+
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { RefreshCw, ExternalLink, ArrowLeft, Copy } from "lucide-react";
 import { useState } from "react";
 import DashboardLayout from "../dashboard-layout";
+import { Input } from "@/components/ui/input";
 
 const tokens = [
-  { name: "Bonk", symbol: "Bonk", balance: "0.52", contract: "rx86t...762yu", reward: "+50 XZN", status: "remove" },
-  { name: "SOL", symbol: "SOL", balance: "0.52", contract: "rx86t...762yu", reward: "+50 XZN", status: "add" },
-  { name: "Jito", symbol: "Jito", balance: "0.52", contract: "rx86t...762yu", reward: "+50 XZN", status: "remove" },
-  { name: "USDC", symbol: "USDC", balance: "0.52", contract: "rx86t...762yu", reward: "+50 XZN", status: "remove" },
-  { name: "SOL", symbol: "SOL", balance: "0.52", contract: "rx86t...762yu", reward: "+50 XZN", status: "add" },
-  { name: "SOL", symbol: "SOL", balance: "0.52", contract: "rx86t...762yu", reward: "+50 XZN", status: "add" },
-  { name: "SOL", symbol: "SOL", balance: "0.52", contract: "rx86t...762yu", reward: "+50 XZN", status: "add" },
+  { name: "Bonk", symbol: "Bonk", balance: "900,000", contract: "rx86t...762yu", reward: "+50 XZN", status: "remove" },
+  { name: "SOL", symbol: "SOL", balance: "900,000", contract: "rx86t...762yu", reward: "+50 XZN", status: "add" },
+  { name: "Jito", symbol: "Jito", balance: "900,000", contract: "rx86t...762yu", reward: "+50 XZN", status: "remove" },
+  { name: "USDC", symbol: "USDC", balance: "900,000", contract: "rx86t...762yu", reward: "+50 XZN", status: "remove" },
+  { name: "SOL", symbol: "SOL", balance: "900,000", contract: "rx86t...762yu", reward: "+50 XZN", status: "add" },
+  { name: "SOL", symbol: "SOL", balance: "900,000", contract: "rx86t...762yu", reward: "+50 XZN", status: "add" },
+  { name: "SOL", symbol: "SOL", balance: "900,000", contract: "rx86t...762yu", reward: "+50 XZN", status: "add" },
 ];
 
 const selectedTokens = [
-  { name: "Bonk", amount: "0.02", reward: "+50 XZN" },
-  { name: "USDC", amount: "100", reward: "+50 XZN" },
-  { name: "Jito", amount: "100", reward: "+50 XZN" },
+  { id: 1, name: "Bonk", amount: 100, reward: "+50 XZN" },
+  { id: 2, name: "USDC", amount: 100, reward: "+50 XZN" },
+  { id: 3, name: "Jito", amount: 100, reward: "+50 XZN" },
 ];
 
 export default function Contribute() {
-  const [contribution] = useState(selectedTokens);
+  const [contribution, setContribution] = useState(selectedTokens);
+
+  const handleAmountChange = (id: number, newAmount: number) => {
+    setContribution(prev =>
+      prev.map(token =>
+        token.id === id ? { ...token, amount: newAmount } : token
+      )
+    );
+  };
   const pageDescription = <>Select the tokens you want to contribute. <br/>You don't need to contribute all units of each token.</>;
 
   return (
@@ -105,8 +116,8 @@ export default function Contribute() {
             <h2 className="mb-6 text-lg font-semibold">Contribution Preview</h2>
             
             <div className="mb-6 space-y-3">
-              {contribution.map((token, index) => (
-                <div key={index} className="flex items-center justify-between rounded-lg bg-secondary p-3">
+              {contribution.map((token) => (
+                <div key={token.id} className="flex items-center justify-between rounded-lg bg-secondary p-3">
                   <div className="flex items-center gap-2">
                     <div className="h-8 w-8 rounded-full bg-primary/20" />
                     <div>
@@ -114,9 +125,14 @@ export default function Contribute() {
                       <div className="text-xs text-muted-foreground">{token.reward}</div>
                     </div>
                   </div>
+                  {/* Contribution Amount */}
                   <div className="text-right">
-                    <div className="font-medium">{token.amount}</div>
-                    <div className="text-xs text-muted-foreground">{token.name}</div>
+                    <Input
+                      type="number"
+                      value={token.amount}
+                      onChange={(e) => handleAmountChange(token.id, parseInt(e.target.value, 10))}
+                      className="w-24 text-right text-lg font-semibold"
+                      />
                   </div>
                 </div>
               ))}
