@@ -20,7 +20,8 @@ export default function Leaderboard() {
       pageDescription="See how your contributions rank across the community"
     >
       {/* Time Period Tabs */}
-      <div className="mb-6 flex gap-2">
+      <div className="">
+        <div className="mb-6 overflow-x-auto whitespace-nowrap flex gap-2">
         {tabs.map((tab, index) => (
           <button
             key={tab}
@@ -34,9 +35,8 @@ export default function Leaderboard() {
           </button>
         ))}
       </div>
-
-      <div className="grid gap-6 lg:grid-cols-3">
-        {/* Top Contributors */}
+        <div className="lg:grid gap-6 lg:grid-cols-3">
+          {/* Top Contributors */}
         <div className="lg:col-span-2">
           <Card className="bg-card border-border">
             <div className="border-b border-border p-6">
@@ -81,7 +81,7 @@ export default function Leaderboard() {
         </div>
 
         {/* Your Rank Card */}
-        <div>
+        <div className="mt-6 lg:mt-0">
           <Card className="bg-card border-border p-6">
             <h2 className="mb-6 text-lg font-semibold">Your Rank</h2>
             
@@ -124,6 +124,7 @@ export default function Leaderboard() {
               Boost My Rank
             </Button>
           </Card>
+        </div>
         </div>
       </div>
     </DashboardLayout>

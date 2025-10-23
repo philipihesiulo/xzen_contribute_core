@@ -1,7 +1,7 @@
 import { Card } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+
 import { Switch } from "@/components/ui/switch";
-import { Copy, ExternalLink, ChevronRight, Flame } from "lucide-react";
+import { ExternalLink, ChevronRight, Flame } from "lucide-react";
 import DashboardLayout from "../dashboard-layout";
 
 const contributions = Array(8).fill(null).map(() => ({
