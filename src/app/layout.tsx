@@ -6,7 +6,7 @@ import "../index.css";
 import "@solana/wallet-adapter-react-ui/styles.css";
 import { WalletContextProvider } from "@/providers/WalletContextProvider";
 import { ErrorToast } from "@/components/ErrorToast";
-import { Toaster } from "@/components/ui/sonner";
+import { Toaster } from "@/components/ui/toaster";
 
 const inter = Inter({ subsets: ["latin"] });
 

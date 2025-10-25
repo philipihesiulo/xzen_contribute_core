@@ -35,7 +35,6 @@ interface AuthProviderProps {
 export const AuthProvider: FC<AuthProviderProps> = ({ children }) => {
     const [user, setUser] = useState<User | null>(null);
     const [isLoading, setIsLoading] = useState(true);
-
     const wallet = useWallet();
     const { publicKey, connected, disconnect } = wallet;
     const { setVisible } = useWalletModal();
@@ -45,23 +44,6 @@ export const AuthProvider: FC<AuthProviderProps> = ({ children }) => {
     );
 
     useEffect(() => {
-        const authenticateUser = async () => {
-            try {
-                console.log(publicKey);
-                if (connected) {
-                    console.log("About to signin user...");
-                    await signInWithSolana(wallet);
-                    throw new Error("User signed in successfully.");
-                } else {
-                    throw new Error("Wallet not ready for signing.");
-                }
-            } catch (error) {
-                console.error("Failed to sign in:", error);
-            }
-        };
-
-        authenticateUser();
-
         const { data: authListener } = supabase.auth.onAuthStateChange(
             async (event, session) => {
                 setUser(session?.user || null);
@@ -78,12 +60,20 @@ export const AuthProvider: FC<AuthProviderProps> = ({ children }) => {
         return () => {
             authListener.subscription.unsubscribe();
         };
-    }, [wallet]);
+    }, [wallet, user]);
 
     const signIn = async () => {
         if (!connected) {
             setVisible(true);
             return;
+        }
+
+        try {
+            console.log("About to signin user...");
+            await signInWithSolana(wallet);
+        } catch (error) {
+            console.error("Failed to sign in:", error);
+            throw new Error("Wallet not ready for signing.");
         }
     };
 
