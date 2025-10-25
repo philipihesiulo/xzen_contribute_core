@@ -1,3 +1,5 @@
+
+
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Flame, Calendar, Award, Share2, ChevronDown } from "lucide-react";
@@ -197,6 +199,7 @@ export default function Dashboard() {
                     </Card>
                 </div>
             </div>
+            
         </DashboardLayout>
     );
 }

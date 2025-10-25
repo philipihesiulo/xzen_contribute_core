@@ -1,0 +1,9 @@
+[auth.web3.solana]
+enabled = true
+
+[auth.web3.ethereum]
+enabled = true
+
+[auth.rate_limit]
+# Number of Web3 logins that can be made in a 5 minute interval per IP address.
+web3 = 30
