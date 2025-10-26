@@ -7,82 +7,33 @@ import { ExternalLink } from "lucide-react";
 import { useState } from "react";
 import DashboardLayout from "../dashboard-layout";
 import { Input } from "@/components/ui/input";
-
-const tokens = [
-    {
-        name: "Bonk",
-        symbol: "Bonk",
-        balance: "900,000",
-        contract: "rx86t...762yu",
-        reward: "+50 XZN",
-        status: "remove",
-    },
-    {
-        name: "SOL",
-        symbol: "SOL",
-        balance: "900,000",
-        contract: "rx86t...762yu",
-        reward: "+50 XZN",
-        status: "add",
-    },
-    {
-        name: "Jito",
-        symbol: "Jito",
-        balance: "900,000",
-        contract: "rx86t...762yu",
-        reward: "+50 XZN",
-        status: "remove",
-    },
-    {
-        name: "USDC",
-        symbol: "USDC",
-        balance: "900,000",
-        contract: "rx86t...762yu",
-        reward: "+50 XZN",
-        status: "remove",
-    },
-    {
-        name: "SOL",
-        symbol: "SOL",
-        balance: "900,000",
-        contract: "rx86t...762yu",
-        reward: "+50 XZN",
-        status: "add",
-    },
-    {
-        name: "SOL",
-        symbol: "SOL",
-        balance: "900,000",
-        contract: "rx86t...762yu",
-        reward: "+50 XZN",
-        status: "add",
-    },
-    {
-        name: "SOL",
-        symbol: "SOL",
-        balance: "900,000",
-        contract: "rx86t...762yu",
-        reward: "+50 XZN",
-        status: "add",
-    },
-];
-
-const selectedTokens = [
-    { id: 1, name: "Bonk", amount: 100, reward: "+50 XZN" },
-    { id: 2, name: "USDC", amount: 100, reward: "+50 XZN" },
-    { id: 3, name: "Jito", amount: 100, reward: "+50 XZN" },
-];
+import { Token, useTokenDiscovery } from "@/hooks/useTokenDiscovery";
+import { shortenAddress } from "@/lib/utils";
+import Image from "next/image";
 
 const Contribute = () => {
-    const [contribution, setContribution] = useState(selectedTokens);
+    const [contribution, setContribution] = useState<Token[]>([]);
     const isMobile = useIsMobile();
+    const { tokens, isLoading, error } = useTokenDiscovery();
 
-    const handleAmountChange = (id: number, newAmount: number) => {
+    const handleAmountChange = (mint: string, newAmount: number) => {
         setContribution((prev) =>
             prev.map((token) =>
-                token.id === id ? { ...token, amount: newAmount } : token
+                token.mint === mint ? { ...token, balance: newAmount } : token
             )
         );
+    };
+
+    const addTokenToContribution = (token: Token) => {
+        setContribution((prev) => [...prev, token]);
+    };
+
+    const removeTokenFromContribution = (mint: string) => {
+        setContribution((prev) => prev.filter((token) => token.mint !== mint));
+    };
+
+    const isTokenAdded = (mint: string) => {
+        return contribution.some((token) => token.mint === mint);
     };
     const pageDescription = (
         <>
@@ -146,47 +97,80 @@ const Contribute = () => {
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        {tokens.map((token, index) => (
-                                            <tr
-                                                key={index}
-                                                className="border-b border-border last:border-0"
-                                            >
-                                                <td className="p-4">
-                                                    <div className="flex items-center gap-2">
-                                                        <div className="h-8 w-8 rounded-full bg-primary/20" />
-                                                        <span className="font-medium">
-                                                            {token.symbol}
-                                                        </span>
-                                                    </div>
+                                        {isLoading ? (
+                                            <tr>
+                                                <td
+                                                    colSpan={5}
+                                                    className="p-4 text-center"
+                                                >
+                                                    Loading tokens...
                                                 </td>
-                                                <td className="p-4">
-                                                    {token.status === "add" ? (
+                                            </tr>
+                                        ) : error ? (
+                                            <tr>
+                                                <td
+                                                    colSpan={5}
+                                                    className="p-4 text-center text-red-500"
+                                                >
+                                                    Error loading tokens:{" "}
+                                                    {error.message}
+                                                </td>
+                                            </tr>
+                                        ) : (
+                                            tokens?.map((token, index) => (
+                                                <tr
+                                                    key={index}
+                                                    className="border-b border-border last:border-0"
+                                                >
+                                                    <td className="p-4">
+                                                        <div className="flex items-center gap-2">
+                                                            <div className="h-8 w-8 rounded-full bg-primary/20">
+                                                                {token.image && (
+                                                                    <Image
+                                                                        src={`/api/image-proxy?url=${encodeURIComponent(
+                                                                            token.image
+                                                                        )}`}
+                                                                        alt={
+                                                                            token.name
+                                                                        }
+                                                                        width={
+                                                                            32
+                                                                        }
+                                                                        height={
+                                                                            32
+                                                                        }
+                                                                        unoptimized
+                                                                        className="rounded-full"
+                                                                    />
+                                                                )}
+                                                            </div>
+                                                            <span className="font-medium">
+                                                                {token.symbol}
+                                                            </span>
+                                                        </div>
+                                                    </td>
+                                                    <td className="p-4">
                                                         <Button
                                                             size="sm"
                                                             className="gradient-primary"
                                                         >
                                                             Add
                                                         </Button>
-                                                    ) : (
-                                                        <Button
-                                                            size="sm"
-                                                            variant="outline"
-                                                        >
-                                                            Remove
-                                                        </Button>
-                                                    )}
-                                                </td>
-                                                <td className="p-4">
-                                                    {token.balance}
-                                                </td>
-                                                <td className="p-4 text-muted-foreground">
-                                                    {token.contract}
-                                                </td>
-                                                <td className="p-4 font-medium text-accent">
-                                                    {token.reward}
-                                                </td>
-                                            </tr>
-                                        ))}
+                                                    </td>
+                                                    <td className="p-4">
+                                                        {token.balance}
+                                                    </td>
+                                                    <td className="p-4 text-muted-foreground">
+                                                        {shortenAddress(
+                                                            token.mint
+                                                        )}
+                                                    </td>
+                                                    <td className="p-4 font-medium text-accent">
+                                                        +50 XZN
+                                                    </td>
+                                                </tr>
+                                            ))
+                                        )}
                                     </tbody>
                                 </table>
                             ) : (
@@ -211,47 +195,80 @@ const Contribute = () => {
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        {tokens.map((token, index) => (
-                                            <tr
-                                                key={index}
-                                                className="border-b border-border last:border-0"
-                                            >
-                                                <td className="p-4">
-                                                    <div className="flex items-center gap-2">
-                                                        <div className="h-8 w-8 rounded-full bg-primary/20" />
-                                                        <span className="font-medium">
-                                                            {token.symbol}
-                                                        </span>
-                                                    </div>
+                                        {isLoading ? (
+                                            <tr>
+                                                <td
+                                                    colSpan={5}
+                                                    className="p-4 text-center"
+                                                >
+                                                    Loading tokens...
                                                 </td>
-                                                <td className="p-4">
-                                                    {token.balance}
+                                            </tr>
+                                        ) : error ? (
+                                            <tr>
+                                                <td
+                                                    colSpan={5}
+                                                    className="p-4 text-center text-red-500"
+                                                >
+                                                    Error loading tokens:{" "}
+                                                    {error.message}
                                                 </td>
-                                                <td className="p-4 text-muted-foreground">
-                                                    {token.contract}
-                                                </td>
-                                                <td className="p-4 font-medium text-accent">
-                                                    {token.reward}
-                                                </td>
-                                                <td className="p-4">
-                                                    {token.status === "add" ? (
+                                            </tr>
+                                        ) : (
+                                            tokens?.map((token, index) => (
+                                                <tr
+                                                    key={index}
+                                                    className="border-b border-border last:border-0"
+                                                >
+                                                    <td className="p-4">
+                                                        <div className="flex items-center gap-2">
+                                                            <div className="h-8 w-8 rounded-full bg-primary/20">
+                                                                {token.image && (
+                                                                    <Image
+                                                                        src={`/api/image-proxy?url=${encodeURIComponent(
+                                                                            token.image
+                                                                        )}`}
+                                                                        alt={
+                                                                            token.name
+                                                                        }
+                                                                        width={
+                                                                            32
+                                                                        }
+                                                                        height={
+                                                                            32
+                                                                        }
+                                                                        className="rounded-full"
+                                                                        unoptimized
+                                                                    />
+                                                                )}
+                                                            </div>
+                                                            <span className="font-medium">
+                                                                {token.symbol}
+                                                            </span>
+                                                        </div>
+                                                    </td>
+                                                    <td className="p-4">
+                                                        {token.balance}
+                                                    </td>
+                                                    <td className="p-4 text-muted-foreground">
+                                                        {shortenAddress(
+                                                            token.mint
+                                                        )}
+                                                    </td>
+                                                    <td className="p-4 font-medium text-accent">
+                                                        +50 XZN
+                                                    </td>
+                                                    <td className="p-4">
                                                         <Button
                                                             size="sm"
                                                             className="gradient-primary"
                                                         >
                                                             Add
                                                         </Button>
-                                                    ) : (
-                                                        <Button
-                                                            size="sm"
-                                                            variant="outline"
-                                                        >
-                                                            Remove
-                                                        </Button>
-                                                    )}
-                                                </td>
-                                            </tr>
-                                        ))}
+                                                    </td>
+                                                </tr>
+                                            ))
+                                        )}
                                     </tbody>
                                 </table>
                             )}
@@ -260,6 +277,7 @@ const Contribute = () => {
                 </div>
 
                 {/* Contribution Preview */}
+                {/*
                 <div className="mt-6 lg:mt-0">
                     <Card className="bg-card border-border p-6">
                         <h2 className="mb-6 text-lg font-semibold">
@@ -283,7 +301,7 @@ const Contribute = () => {
                                             </div>
                                         </div>
                                     </div>
-                                    {/* Contribution Amount */}
+                                    {/* Contribution Amount 
                                     <div className="text-right">
                                         <Input
                                             type="number"
@@ -341,7 +359,7 @@ const Contribute = () => {
                             Confirm Contribution
                         </Button>
                     </Card>
-                </div>
+                </div> */}
             </div>
         </DashboardLayout>
     );

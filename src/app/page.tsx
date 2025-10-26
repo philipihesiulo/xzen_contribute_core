@@ -6,19 +6,23 @@ import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { useAuth } from "../providers/AuthProvider";
 import { useEffect } from "react";
-//import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
+import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
 
 export default function Home() {
     const router = useRouter();
     const { signIn, isConnected, user } = useAuth();
 
     useEffect(() => {
+        console.log("isConnected:", isConnected);
+        console.log("user:", user);
         if (isConnected && !user) {
             console.log("Signing in user...");
             (async () =>
                 await signIn().then(() => {
                     router.push("/dashboard");
                 }))();
+        } else if (user) {
+            router.push("/dashboard");
         }
     }, [isConnected, user, router]);
 
@@ -48,7 +52,7 @@ export default function Home() {
                         height={250}
                     />
                 </div>
-
+                <WalletMultiButton />
                 {/* Main heading */}
                 <h1 className="mb-6 text-4xl font-bold leading-tight tracking-tight md:text-6xl">
                     Turn your worthless Solana tokens into
@@ -64,7 +68,6 @@ export default function Home() {
                     <br />
                     building the diagnostic hub for meme tokens.
                 </p>
-
                 {/* CTA Button */}
                 <Button
                     onClick={handleConnectWallet}
@@ -75,7 +78,6 @@ export default function Home() {
                     {isConnected ? "Connecting..." : "Connect Wallet"}
                     <ArrowRight className="ml-2 h-5 w-5" />
                 </Button>
-
                 {/* <Button
                     onClick={() => {
                         throw new Error("Test Error from UI");

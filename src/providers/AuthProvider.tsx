@@ -1,24 +1,17 @@
 "use client";
 
-import React, {
-    FC,
-    createContext,
-    useContext,
-    useEffect,
-    useMemo,
-    useState,
-} from "react";
+import React, { FC, createContext, useContext, useMemo } from "react";
 import { useWalletModal } from "@solana/wallet-adapter-react-ui";
 import { useWallet } from "@solana/wallet-adapter-react";
-import { User } from "@supabase/supabase-js";
-import { supabase } from "@/lib/supabaseClient";
 import {
     signInWithSolana,
     signOut as supabaseSignOut,
 } from "@/lib/authService";
+import { useUser } from "@/hooks/useUser";
+import { UserProfile } from "@/types/user";
 
 interface AuthContextType {
-    user: User | null;
+    user: UserProfile | null | undefined;
     walletAddress: string | null;
     isLoading: boolean;
     signIn: () => Promise<void>;
@@ -33,8 +26,7 @@ interface AuthProviderProps {
 }
 
 export const AuthProvider: FC<AuthProviderProps> = ({ children }) => {
-    const [user, setUser] = useState<User | null>(null);
-    const [isLoading, setIsLoading] = useState(true);
+    const { user, isLoading } = useUser();
     const wallet = useWallet();
     const { publicKey, connected, disconnect } = wallet;
     const { setVisible } = useWalletModal();
@@ -42,25 +34,6 @@ export const AuthProvider: FC<AuthProviderProps> = ({ children }) => {
         () => publicKey?.toBase58() || null,
         [publicKey]
     );
-
-    useEffect(() => {
-        const { data: authListener } = supabase.auth.onAuthStateChange(
-            async (event, session) => {
-                setUser(session?.user || null);
-                setIsLoading(false);
-            }
-        );
-
-        // Check initial session
-        supabase.auth.getSession().then(({ data: { session } }) => {
-            setUser(session?.user || null);
-            setIsLoading(false);
-        });
-
-        return () => {
-            authListener.subscription.unsubscribe();
-        };
-    }, [wallet, user]);
 
     const signIn = async () => {
         if (!connected) {
