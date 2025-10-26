@@ -7,6 +7,7 @@ import "@solana/wallet-adapter-react-ui/styles.css";
 import { WalletContextProvider } from "@/providers/WalletContextProvider";
 import { ErrorToast } from "@/components/ErrorToast";
 import { Toaster } from "@/components/ui/toaster";
+import { QueryContextProvider } from "@/providers/QueryContextProvider";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -24,9 +25,11 @@ export default function RootLayout({
     return (
         <html lang="en">
             <body className={inter.className}>
-                <WalletContextProvider>
-                    <AuthProvider>{children}</AuthProvider>
-                </WalletContextProvider>
+                <QueryContextProvider>
+                    <WalletContextProvider>
+                        <AuthProvider>{children}</AuthProvider>
+                    </WalletContextProvider>
+                </QueryContextProvider>
                 <ErrorToast />
                 <Toaster />
             </body>

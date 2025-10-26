@@ -7,65 +7,7 @@ import { ExternalLink } from "lucide-react";
 import { useState } from "react";
 import DashboardLayout from "../dashboard-layout";
 import { Input } from "@/components/ui/input";
-
-const tokens = [
-    {
-        name: "Bonk",
-        symbol: "Bonk",
-        balance: "900,000",
-        contract: "rx86t...762yu",
-        reward: "+50 XZN",
-        status: "remove",
-    },
-    {
-        name: "SOL",
-        symbol: "SOL",
-        balance: "900,000",
-        contract: "rx86t...762yu",
-        reward: "+50 XZN",
-        status: "add",
-    },
-    {
-        name: "Jito",
-        symbol: "Jito",
-        balance: "900,000",
-        contract: "rx86t...762yu",
-        reward: "+50 XZN",
-        status: "remove",
-    },
-    {
-        name: "USDC",
-        symbol: "USDC",
-        balance: "900,000",
-        contract: "rx86t...762yu",
-        reward: "+50 XZN",
-        status: "remove",
-    },
-    {
-        name: "SOL",
-        symbol: "SOL",
-        balance: "900,000",
-        contract: "rx86t...762yu",
-        reward: "+50 XZN",
-        status: "add",
-    },
-    {
-        name: "SOL",
-        symbol: "SOL",
-        balance: "900,000",
-        contract: "rx86t...762yu",
-        reward: "+50 XZN",
-        status: "add",
-    },
-    {
-        name: "SOL",
-        symbol: "SOL",
-        balance: "900,000",
-        contract: "rx86t...762yu",
-        reward: "+50 XZN",
-        status: "add",
-    },
-];
+import { useTokenDiscovery } from "@/hooks/useTokenDiscovery";
 
 const selectedTokens = [
     { id: 1, name: "Bonk", amount: 100, reward: "+50 XZN" },
@@ -76,6 +18,7 @@ const selectedTokens = [
 const Contribute = () => {
     const [contribution, setContribution] = useState(selectedTokens);
     const isMobile = useIsMobile();
+    const { tokens, isLoading, error } = useTokenDiscovery();
 
     const handleAmountChange = (id: number, newAmount: number) => {
         setContribution((prev) =>
@@ -146,47 +89,48 @@ const Contribute = () => {
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        {tokens.map((token, index) => (
-                                            <tr
-                                                key={index}
-                                                className="border-b border-border last:border-0"
-                                            >
-                                                <td className="p-4">
-                                                    <div className="flex items-center gap-2">
-                                                        <div className="h-8 w-8 rounded-full bg-primary/20" />
-                                                        <span className="font-medium">
-                                                            {token.symbol}
-                                                        </span>
-                                                    </div>
-                                                </td>
-                                                <td className="p-4">
-                                                    {token.status === "add" ? (
+                                        {isLoading ? (
+                                            <tr>
+                                                <td colSpan={5} className="p-4 text-center">Loading tokens...</td>
+                                            </tr>
+                                        ) : error ? (
+                                            <tr>
+                                                <td colSpan={5} className="p-4 text-center text-red-500">Error loading tokens: {error.message}</td>
+                                            </tr>
+                                        ) : (
+                                            tokens?.map((token, index) => (
+                                                <tr
+                                                    key={index}
+                                                    className="border-b border-border last:border-0"
+                                                >
+                                                    <td className="p-4">
+                                                        <div className="flex items-center gap-2">
+                                                            <div className="h-8 w-8 rounded-full bg-primary/20" />
+                                                            <span className="font-medium">
+                                                                {token.symbol}
+                                                            </span>
+                                                        </div>
+                                                    </td>
+                                                    <td className="p-4">
                                                         <Button
                                                             size="sm"
                                                             className="gradient-primary"
                                                         >
                                                             Add
                                                         </Button>
-                                                    ) : (
-                                                        <Button
-                                                            size="sm"
-                                                            variant="outline"
-                                                        >
-                                                            Remove
-                                                        </Button>
-                                                    )}
-                                                </td>
-                                                <td className="p-4">
-                                                    {token.balance}
-                                                </td>
-                                                <td className="p-4 text-muted-foreground">
-                                                    {token.contract}
-                                                </td>
-                                                <td className="p-4 font-medium text-accent">
-                                                    {token.reward}
-                                                </td>
-                                            </tr>
-                                        ))}
+                                                    </td>
+                                                    <td className="p-4">
+                                                        {token.balance}
+                                                    </td>
+                                                    <td className="p-4 text-muted-foreground">
+                                                        {token.mint}
+                                                    </td>
+                                                    <td className="p-4 font-medium text-accent">
+                                                        +50 XZN
+                                                    </td>
+                                                </tr>
+                                            ))
+                                        )}
                                     </tbody>
                                 </table>
                             ) : (
@@ -211,47 +155,48 @@ const Contribute = () => {
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        {tokens.map((token, index) => (
-                                            <tr
-                                                key={index}
-                                                className="border-b border-border last:border-0"
-                                            >
-                                                <td className="p-4">
-                                                    <div className="flex items-center gap-2">
-                                                        <div className="h-8 w-8 rounded-full bg-primary/20" />
-                                                        <span className="font-medium">
-                                                            {token.symbol}
-                                                        </span>
-                                                    </div>
-                                                </td>
-                                                <td className="p-4">
-                                                    {token.balance}
-                                                </td>
-                                                <td className="p-4 text-muted-foreground">
-                                                    {token.contract}
-                                                </td>
-                                                <td className="p-4 font-medium text-accent">
-                                                    {token.reward}
-                                                </td>
-                                                <td className="p-4">
-                                                    {token.status === "add" ? (
+                                        {isLoading ? (
+                                            <tr>
+                                                <td colSpan={5} className="p-4 text-center">Loading tokens...</td>
+                                            </tr>
+                                        ) : error ? (
+                                            <tr>
+                                                <td colSpan={5} className="p-4 text-center text-red-500">Error loading tokens: {error.message}</td>
+                                            </tr>
+                                        ) : (
+                                            tokens?.map((token, index) => (
+                                                <tr
+                                                    key={index}
+                                                    className="border-b border-border last:border-0"
+                                                >
+                                                    <td className="p-4">
+                                                        <div className="flex items-center gap-2">
+                                                            <div className="h-8 w-8 rounded-full bg-primary/20" />
+                                                            <span className="font-medium">
+                                                                {token.symbol}
+                                                            </span>
+                                                        </div>
+                                                    </td>
+                                                    <td className="p-4">
+                                                        {token.balance}
+                                                    </td>
+                                                    <td className="p-4 text-muted-foreground">
+                                                        {token.mint}
+                                                    </td>
+                                                    <td className="p-4 font-medium text-accent">
+                                                        +50 XZN
+                                                    </td>
+                                                    <td className="p-4">
                                                         <Button
                                                             size="sm"
                                                             className="gradient-primary"
                                                         >
                                                             Add
                                                         </Button>
-                                                    ) : (
-                                                        <Button
-                                                            size="sm"
-                                                            variant="outline"
-                                                        >
-                                                            Remove
-                                                        </Button>
-                                                    )}
-                                                </td>
-                                            </tr>
-                                        ))}
+                                                    </td>
+                                                </tr>
+                                            ))
+                                        )}
                                     </tbody>
                                 </table>
                             )}

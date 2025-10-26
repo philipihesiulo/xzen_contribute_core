@@ -1,40 +1,49 @@
+"use client";
+
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Flame, Calendar, Award, Share2, ChevronDown } from "lucide-react";
 import Image from "next/image";
 import DashboardLayout from "../dashboard-layout";
 import { RecentContributions } from "@/components/RecentContributions";
-
-const stats = [
-    {
-        icon: Flame,
-        label: "+10% Bonus",
-        value: "Reach 7 days and earn",
-        progress: 70,
-    },
-    {
-        icon: Calendar,
-        label: "Day 7",
-        value: "Daily Streak",
-    },
-    {
-        icon: Award,
-        label: "42",
-        value: "Tokens Contributed",
-    },
-];
-
-const leaderboard = [
-    { rank: 1, username: "x09e...756o", points: "500 XZN" },
-    { rank: 2, username: "x09e...756o", points: "500 XZN" },
-    { rank: 3, username: "x09e...756o", points: "500 XZN" },
-    { rank: 4, username: "x09e...756o", points: "500 XZN" },
-    { rank: 5, username: "x09e...756o", points: "500 XZN" },
-];
+import { useUser } from "@/hooks/useUser";
 
 export default function Dashboard() {
+    const { user } = useUser();
+
+    const bonusProgress = user ? (user?.current_streak / 7) * 100 : 0;
+
+    const stats = [
+        {
+            icon: Flame,
+            value: "+10% Bonus",
+            label: "Reach 7 days and earn",
+            progress: bonusProgress.toString(),
+        },
+        {
+            icon: Calendar,
+            value: user?.current_streak || 0,
+            label: "Daily Streak",
+        },
+        {
+            icon: Award,
+            value: user?.unique_token_count || 0,
+            label: "Tokens Contributed",
+        },
+    ];
+
+    const leaderboard = [
+        { rank: 1, username: "x09e...756o", points: "500 XZN" },
+        { rank: 2, username: "x09e...756o", points: "500 XZN" },
+        { rank: 3, username: "x09e...756o", points: "500 XZN" },
+        { rank: 4, username: "x09e...756o", points: "500 XZN" },
+        { rank: 5, username: "x09e...756o", points: "500 XZN" },
+    ];
+
     return (
         <DashboardLayout pageTitle="Dashboard" noBackButton={true}>
+            {/* User Stats */}
+
             {/* Main Content Grid */}
             <div className="lg:grid gap-6 lg:grid-cols-3">
                 {/* Left Column - Points and Contributions */}
@@ -57,7 +66,7 @@ export default function Dashboard() {
                                         Total XZN Points
                                     </p>
                                     <h2 className="text-3xl font-bold">
-                                        3,420 XZN
+                                        {user?.total_xzn_points || 0}
                                     </h2>
                                 </div>
                             </div>
@@ -80,10 +89,10 @@ export default function Dashboard() {
                                     </div>
                                     <div className="flex-1">
                                         <h3 className="text-xl font-bold">
-                                            {stat.label}
+                                            {stat.value}
                                         </h3>
                                         <p className="text-sm text-muted-foreground">
-                                            {stat.value}
+                                            {stat.label}
                                         </p>
                                         {stat.progress && (
                                             <div className="mt-3 h-1 overflow-hidden rounded-full bg-secondary">
