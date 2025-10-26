@@ -13,12 +13,16 @@ export default function Home() {
     const { signIn, isConnected, user } = useAuth();
 
     useEffect(() => {
+        console.log("isConnected:", isConnected);
+        console.log("user:", user);
         if (isConnected && !user) {
             console.log("Signing in user...");
             (async () =>
                 await signIn().then(() => {
                     router.push("/dashboard");
                 }))();
+        } else if (user) {
+            router.push("/dashboard");
         }
     }, [isConnected, user, router]);
 
