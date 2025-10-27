@@ -26,7 +26,7 @@ const fetchTokenAccounts = async (publicKey: PublicKey, connection: Connection) 
             balance: account.data.parsed.info.tokenAmount.uiAmount,
             mint: metadata.mint,
             uri: metadata.uri,
-            reward: 0, // Placeholder for reward, to be calculated elsewhere
+            reward: 10, // Placeholder for reward, to be calculated elsewhere
         };
 
         // Fetch the off-chain JSON metadata

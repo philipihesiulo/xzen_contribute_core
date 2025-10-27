@@ -59,8 +59,7 @@ export function Sidebar({ onLinkClick }: SidebarProps) {
                             pathname === item.href
                                 ? "bg-primary/10 text-primary"
                                 : "text-muted-foreground hover:bg-secondary hover:text-foreground"
-                        )}
-                    >
+                        )}>
                         <item.icon className="h-5 w-5" />
                         {item.name}
                     </Link>
@@ -73,8 +72,7 @@ export function Sidebar({ onLinkClick }: SidebarProps) {
                 <Button
                     onClick={handleSignOut}
                     variant="outline"
-                    className="w-full border-primary/30 text-primary hover:bg-primary/10"
-                >
+                    className="w-full border-primary/30 text-primary hover:bg-primary/10">
                     <Wallet className="mr-2 h-4 w-4" />
                     Disconnect Wallet
                 </Button>
