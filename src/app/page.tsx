@@ -36,8 +36,7 @@ export default function Home() {
             <div
                 className="absolute inset-0"
                 style={{
-                    background:
-                        "radial-gradient(circle, #23104F 0%, #0B0E13 100%)",
+                    background: "radial-gradient(circle, #23104F 0%, #0B0E13 100%)",
                 }}
             />
 
@@ -52,7 +51,6 @@ export default function Home() {
                         height={250}
                     />
                 </div>
-                <WalletMultiButton />
                 {/* Main heading */}
                 <h1 className="mb-6 text-4xl font-bold leading-tight tracking-tight md:text-6xl">
                     Turn your worthless Solana tokens into
@@ -73,8 +71,7 @@ export default function Home() {
                     onClick={handleConnectWallet}
                     size="lg"
                     className="gradient-primary h-14 px-12 text-base font-semibold shadow-glow"
-                    disabled={isConnected && !user}
-                >
+                    disabled={isConnected && !user}>
                     {isConnected ? "Connecting..." : "Connect Wallet"}
                     <ArrowRight className="ml-2 h-5 w-5" />
                 </Button>

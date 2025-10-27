@@ -1,15 +1,9 @@
 "use client";
 
 import { useIsMobile } from "@/hooks/useMobile";
-import { Card } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { ExternalLink } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import DashboardLayout from "../dashboard-layout";
-import { Input } from "@/components/ui/input";
-import { useTokenDiscovery } from "@/hooks/useTokenDiscovery";
-import { shortenAddress } from "@/lib/utils";
-import Image from "next/image";
+import { useTokenDiscovery, useTokensMetadata } from "@/hooks/useTokenDiscovery";
 import { ContributionToken, Token } from "@/types/token";
 import { TokenSelection } from "@/components/TokenSelection";
 import ContributionPreview from "@/components/ContributionPreview";
@@ -18,6 +12,29 @@ const Contribute = () => {
     const [contribution, setContribution] = useState<ContributionToken[]>([]);
     const isMobile = useIsMobile();
     const { tokens, isLoading, error } = useTokenDiscovery();
+    const {
+        tokensMetadata,
+        isLoading: isMetadataLoading,
+        error: metadataError,
+    } = useTokensMetadata();
+
+    useEffect(() => {
+        console.log("[EFFECT] Tokens Metadata: ", tokensMetadata);
+        console.log("[EFFECT] Tokens: ", tokens);
+        if (!isMetadataLoading && !metadataError) {
+            // Merge tokens with their metadata
+            const updatedTokens: Token[] = [];
+            tokens?.forEach((token) => {
+                const metadata = tokensMetadata?.find((meta) => meta.mint === token.mint);
+                if (metadata) {
+                    updatedTokens.push(metadata);
+                } else {
+                    updatedTokens.push(token);
+                }
+            });
+            //console.log(updatedTokens);
+        }
+    }, [tokens, tokensMetadata]);
 
     const handleAmountChange = (mint: string, newAmount: number) => {
         setContribution((prev) =>
