@@ -6,7 +6,7 @@ import { WalletBalance } from "@/components/WalletBalance";
 import { ArrowLeft, Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
-import { useIsMobile } from "@/hooks/use-mobile";
+import { useIsMobile } from "@/hooks/useMobile";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import withAuth from "@/middlewares/withAuth";
 

@@ -1,18 +1,19 @@
+import js from "@eslint/js";
+import next from "@next/eslint-plugin-next";
+import tseslint from "@typescript-eslint/eslint-plugin";
+import tsParser from "@typescript-eslint/parser";
+import prettierPlugin from "eslint-plugin-prettier";
 import globals from "globals";
-import pluginJs from "@eslint/js";
-import tseslint from "typescript-eslint";
-import nextPlugin from "@next/eslint-plugin-next";
 
-export default tseslint.config(
+export default [
     { ignores: ["node_modules", ".next", "dist"] },
+
     {
-        files: ["**/*.{js,mjs,cjs,ts,jsx,tsx}"],
+        files: ["**/*.{js,jsx,ts,tsx,mjs,cjs}"],
         languageOptions: {
-            parser: tseslint.parser,
+            parser: tsParser,
             parserOptions: {
-                ecmaFeatures: {
-                    jsx: true,
-                },
+                ecmaFeatures: { jsx: true },
                 ecmaVersion: "latest",
                 sourceType: "module",
             },
@@ -22,16 +23,31 @@ export default tseslint.config(
             },
         },
         plugins: {
-            "@typescript-eslint": tseslint.plugin,
-            "@next/next": nextPlugin,
+            "@typescript-eslint": tseslint,
+            "@next/next": next,
+            prettier: prettierPlugin,
         },
         rules: {
-            ...pluginJs.configs.recommended.rules,
+            ...js.configs.recommended.rules,
             ...tseslint.configs.recommended.rules,
-            ...nextPlugin.configs.recommended.rules,
-            ...nextPlugin.configs["core-web-vitals"].rules,
+            ...next.configs.recommended.rules,
+            ...next.configs["core-web-vitals"].rules,
+
+            // Disable unused React import rule for Next.js
             "react/react-in-jsx-scope": "off",
-            "@typescript-eslint/no-unused-vars": "warn",
+
+            // TypeScript: ignore unused variables starting with _
+            "@typescript-eslint/no-unused-vars": [
+                "warn",
+                {
+                    argsIgnorePattern: "^_",
+                    varsIgnorePattern: "^_",
+                    ignoreRestSiblings: true,
+                },
+            ],
+
+            // Enable Prettier integration
+            "prettier/prettier": "warn",
         },
-    }
-);
+    },
+];
