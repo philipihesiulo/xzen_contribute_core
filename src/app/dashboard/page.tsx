@@ -66,7 +66,7 @@ export default function Dashboard() {
                                         Total XZN Points
                                     </p>
                                     <h2 className="text-3xl font-bold">
-                                        {user?.total_xzn_points || 0}
+                                        {user?.total_xzn_points || 0} XZN
                                     </h2>
                                 </div>
                             </div>
