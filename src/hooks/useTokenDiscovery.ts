@@ -6,10 +6,16 @@ import { mplTokenMetadata } from "@metaplex-foundation/mpl-token-metadata";
 import { createUmi } from "@metaplex-foundation/umi-bundle-defaults";
 import { fetchDigitalAsset } from "@metaplex-foundation/mpl-token-metadata";
 import { Token } from "@/types/token";
+import { supabase } from "@/lib/supabaseClient";
 
 const SOLANA_RPC_HOST = process.env.NEXT_PUBLIC_SOLANA_RPC_HOST || "";
 
 const umi = createUmi(SOLANA_RPC_HOST).use(mplTokenMetadata());
+
+type TokenReward = {
+    mint: string;
+    points: number;
+};
 
 const fetchTokenAccounts = async (publicKey: PublicKey, connection: Connection) => {
     const tokenAccounts = await connection.getParsedTokenAccountsByOwner(publicKey, {
@@ -29,46 +35,70 @@ const fetchTokenAccounts = async (publicKey: PublicKey, connection: Connection) 
             reward: 10, // Placeholder for reward, to be calculated elsewhere
         };
 
-        // Fetch the off-chain JSON metadata
-        // try {
-        //   const response = await fetch(metadata.uri);
-        //   const additional_metadata = await response.json();
-
-        //   console.log("Additional Metadata for mint", metadata.mint, " : ", additional_metadata);
-
-        //   if (additional_metadata) {
-        //     tokenDetails.description = additional_metadata.description || "";
-        //     tokenDetails.image = additional_metadata.image || "";
-        //     tokenDetails.createdOn = additional_metadata.createdOn?.toString() || "";
-        //   }
-        // }catch (error) {
-        //   console.log("Error fetching metadata for mint", metadata.mint, ": ", error);
-        // }
-
         tokens.push(tokenDetails);
     }
+
+    // TODO: Fetch and update reward data
+    try {
+        const {
+            data: { user },
+        } = await supabase.auth.getUser();
+        if (user) {
+            const { data: rewards, error: rpcError } = await supabase.rpc("calculate_xzen_points", {
+                p_user_id: user.id,
+                p_token_mints: tokens.map((token) => token.mint),
+            });
+            if (rpcError) throw rpcError;
+            if (rewards) {
+                const tokensWithRewards = tokens.map((token) => {
+                    const tokenReward = (token.reward = rewards.find(
+                        (reward: TokenReward) => reward.mint === token.mint
+                    )?.points);
+                    token.reward = tokenReward;
+                    return token;
+                });
+                return tokensWithRewards;
+            }
+        }
+    } catch (error) {
+        throw new Error(error as string);
+    }
+
     return tokens;
 };
 
-const fetchTokenMetadata = async (tokens: Token[]) => {
-    return await Promise.all(
+const fetchTokenMetadata = async (tokens: Token[]): Promise<Token[]> => {
+    const results = await Promise.allSettled(
         tokens.map(async (token) => {
-            console.log(token.uri);
-            if (token.uri) {
-                try {
-                    const response = await fetch(token.uri);
-                    const metadata = await response.json();
-                    token.description = metadata.description;
-                    token.image = metadata.image;
-                    token.createdOn = metadata.createdOn?.toString();
+            if (!token.uri) return token;
+
+            try {
+                const response = await fetch(token.uri, { method: "GET" });
+
+                if (!response.ok) {
+                    console.warn(
+                        `Failed to fetch metadata for ${token.name}: HTTP ${response.status}`
+                    );
                     return token;
-                } catch (error) {
-                    console.log(error);
                 }
+
+                const metadata = await response.json();
+
+                return {
+                    ...token,
+                    description: metadata.description ?? token.description,
+                    image: metadata.image ?? token.image,
+                    createdOn: metadata.createdOn?.toString() ?? token.createdOn,
+                };
+            } catch (err) {
+                console.error(`Error fetching metadata for ${token.name}:`, err);
+                return token;
             }
-            return token;
         })
     );
+
+    // Extract only fulfilled results, ignoring rejected ones gracefully
+    return results.map((r) => (r.status === "fulfilled" ? r.value : tokens[results.indexOf(r)]));
 };
 
 export const useTokenDiscovery = () => {

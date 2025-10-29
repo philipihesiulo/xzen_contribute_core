@@ -55,27 +55,18 @@ export default function Profile() {
                 <div className="lg:col-span-2">
                     <Card className="bg-card border-border">
                         <div className="flex items-center justify-between border-b border-border p-6">
-                            <h3 className="text-lg font-semibold">
-                                My Contributions
-                            </h3>
+                            <h3 className="text-lg font-semibold">My Contributions</h3>
                             <button className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground">
-                                View on Solana Explorer{" "}
-                                <ExternalLink className="h-4 w-4" />
+                                View on Solana Explorer <ExternalLink className="h-4 w-4" />
                             </button>
                         </div>
                         <div className="overflow-x-auto">
                             <table className="w-full">
                                 <thead className="border-b border-border">
                                     <tr className="text-left text-sm text-muted-foreground">
-                                        <th className="p-4 font-medium">
-                                            Token
-                                        </th>
-                                        <th className="p-4 font-medium">
-                                            Date
-                                        </th>
-                                        <th className="p-4 font-medium">
-                                            Points
-                                        </th>
+                                        <th className="p-4 font-medium">Token</th>
+                                        <th className="p-4 font-medium">Date</th>
+                                        <th className="p-4 font-medium">Points</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -83,8 +74,7 @@ export default function Profile() {
                                         <tr>
                                             <td
                                                 colSpan={3}
-                                                className="p-4 text-center"
-                                            >
+                                                className="p-4 text-center">
                                                 Loading...
                                             </td>
                                         </tr>
@@ -92,8 +82,7 @@ export default function Profile() {
                                         contributions?.map((item, index) => (
                                             <tr
                                                 key={index}
-                                                className="border-b border-border last:border-0"
-                                            >
+                                                className="border-b border-border last:border-0">
                                                 <td className="p-4">
                                                     <div className="flex items-center gap-2">
                                                         <div className="h-8 w-8 rounded-full bg-primary/20" />
@@ -103,9 +92,7 @@ export default function Profile() {
                                                     </div>
                                                 </td>
                                                 <td className="p-4 text-muted-foreground">
-                                                    {new Date(
-                                                        item.created_at
-                                                    ).toLocaleDateString()}
+                                                    {new Date(item.created_at).toLocaleDateString()}
                                                 </td>
                                                 <td className="p-4 font-medium">
                                                     {item.xzn_points_earned} XZN
@@ -145,23 +132,17 @@ export default function Profile() {
                             <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10">
                                 <span className="text-xl">⚙️</span>
                             </div>
-                            <h3 className="text-lg font-semibold">
-                                Settings & Preference
-                            </h3>
+                            <h3 className="text-lg font-semibold">Settings & Preference</h3>
                         </div>
 
                         <div className="space-y-4">
                             <div className="flex items-center justify-between rounded-lg bg-secondary p-4">
-                                <span className="font-medium">
-                                    Notifications
-                                </span>
+                                <span className="font-medium">Notifications</span>
                                 <Switch defaultChecked />
                             </div>
 
                             <button className="flex w-full items-center justify-between rounded-lg bg-secondary p-4 text-left hover:bg-secondary/80">
-                                <span className="font-medium">
-                                    Wallet Settings
-                                </span>
+                                <span className="font-medium">Wallet Settings</span>
                                 <ChevronRight className="h-5 w-5 text-muted-foreground" />
                             </button>
 

@@ -1,7 +1,7 @@
 /**
  *
  * Atomically records multiple contributions. This function is now highly
- * efficient, calling the batch 'calculate_points_for_tokens' function 
+ * efficient, calling the batch 'calculate_xzen_points' function 
  * only once and performing a single batch insert.
  *
  * @param p_user_id The UUID of the contributing user.
@@ -59,7 +59,7 @@ BEGIN
             (row_number() over()) as ordinality,
             cp.mint,
             cp.points
-        FROM public.calculate_points_for_tokens(
+        FROM public.calculate_xzen_points(
             p_user_id,
             (SELECT arr FROM mints_array)
         ) AS cp

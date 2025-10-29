@@ -3,12 +3,64 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useWallet, useConnection } from "@solana/wallet-adapter-react";
 import { useContributionStore } from "@/stores/contributionStore";
-import { handleContribute } from "@/lib/contributionService";
+import { useModalStore } from "@/stores/modalStore";
+import { useEffect } from "react";
+import Image from "next/image";
 
 export default function ContributionPreview() {
-    const { selected, handleAmountChange } = useContributionStore();
+    const { selected, status, response, error, handleAmountChange, handleContribute } =
+        useContributionStore();
     const wallet = useWallet();
     const { connection } = useConnection();
+    const { openModal } = useModalStore();
+
+    useEffect(() => {
+        if (status === "success") {
+            openModal({
+                title: "Your contribution was successful!",
+                body: successMessage(),
+            });
+        } else if (status === "failed" || error) {
+            openModal({
+                title: "Contribution Failed",
+                body: (
+                    <div>
+                        <h1>Pls try again!</h1>
+                        <p className="mt-6 mb-6">
+                            If the error persists, try to refresh the page and contribute a
+                            different set of tokens.
+                        </p>
+                        <p className="mt-6 text-red-500">{error ? error.toString() : ""}</p>
+                    </div>
+                ),
+            });
+        }
+    }, [status]);
+
+    const successMessage = () => {
+        return (
+            <div>
+                <div className="flex items-center gap-3">
+                    <div className="flex h-12 w-12 items-center justify-center rounded-lg">
+                        <Image
+                            src="/medal.svg"
+                            alt="Medal Icon"
+                            width={50}
+                            height={50}
+                            className="text-primary"
+                        />
+                    </div>
+                    <div>
+                        <p className="text-sm text-muted-foreground">XZN Points Earned</p>
+                        <h2 className="text-3xl font-bold">{response?.pointsEarned} XZN</h2>
+                    </div>
+                </div>
+                <div>
+                    <p>Comeback tomorrow to earn more points</p>
+                </div>
+            </div>
+        );
+    };
 
     return (
         <>

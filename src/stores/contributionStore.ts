@@ -1,17 +1,13 @@
 import { create } from "zustand";
 import { ContributionToken, Token } from "@/types/token";
-
-interface ContributionStoreState {
-    selected: ContributionToken[];
-    addTokenToContribution: (token: Token | ContributionToken) => void;
-    removeTokenFromContribution: (mint: string) => void;
-    handleAmountChange: (token: ContributionToken, newAmount: number) => void;
-    isTokenAdded: (mint: string) => boolean;
-    clearContribution: () => void;
-}
+import { handleContribute } from "@/lib/contributionService";
+import { ContributionStoreState, STATUS } from "@/types/contribution";
 
 export const useContributionStore = create<ContributionStoreState>((set, get) => ({
     selected: [],
+    status: STATUS.PENDING,
+    response: { message: "", pointsEarned: 0 },
+    error: null,
     addTokenToContribution: (token) => {
         if (token.balance === 0) {
             throw new Error("Cannot add token with zero balance to contribution.");
@@ -41,5 +37,17 @@ export const useContributionStore = create<ContributionStoreState>((set, get) =>
     },
     clearContribution: () => {
         set({ selected: [] });
+    },
+    handleContribute: async (connection, wallet, selected) => {
+        await handleContribute(connection, wallet, selected)
+            .then((response) => {
+                set({ selected: [] });
+                set({ status: STATUS.SUCCESS });
+                set({ response });
+            })
+            .catch((error) => {
+                set({ status: STATUS.FAILED });
+                set({ error });
+            });
     },
 }));

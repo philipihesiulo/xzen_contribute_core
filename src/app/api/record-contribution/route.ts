@@ -1,61 +1,131 @@
-import { ContributionToken } from "@/types/token";
 import { supabase } from "@/lib/supabaseClient";
-import { NextApiRequest, NextApiResponse } from "next";
-
-// --- Solana-specific imports ---
-import nacl from "tweetnacl"; // For signature verification
-import bs58 from "bs58"; // For decoding base58 strings (like addresses and signatures)
+import { NextRequest, NextResponse } from "next/server";
+import { Connection } from "@solana/web3.js";
 
 // Define the shape of the request
 interface RecordContributionRequest {
-    userWalletAddress: string; // Base58 public key string
-    signature: string; // Base58 encoded signature string
-    message: string; // The clear-text message that was signed
-    tokens: ContributionToken[];
+    userWalletAddress: string;
+    signature: string; // This is now the transaction ID
 }
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-    if (req.method !== "POST") {
-        res.setHeader("Allow", "POST");
-        return res.status(405).end("Method Not Allowed");
-    }
+// Create a new Solana Connection
+const connection = new Connection(process.env.NEXT_PUBLIC_SOLANA_RPC_HOST!);
+const DEV_WALLET_PK_STRING = process.env.NEXT_PUBLIC_DEVELOPER_WALLET_ADDRESS!;
 
-    const { userWalletAddress, signature, message, tokens } = req.body as RecordContributionRequest;
+if (!DEV_WALLET_PK_STRING) {
+    throw new Error("Missing DEV_WALLET_ADDRESS from .env");
+}
 
-    if (!userWalletAddress || !signature || !message || !tokens || tokens.length === 0) {
-        return res.status(400).json({ error: "Missing required fields." });
+export async function POST(req: NextRequest) {
+    // 1. Get the body by awaiting req.json()
+    const { userWalletAddress, signature } = (await req.json()) as RecordContributionRequest;
+
+    if (!userWalletAddress || !signature) {
+        // 2. Return errors using NextResponse.json()
+        return NextResponse.json(
+            { error: "Missing userWalletAddress or signature." },
+            { status: 400 }
+        );
     }
 
     try {
         // -----------------------------------------------------------------
-        // 1. (CRITICAL) Verify the Solana signature
+        // 3. (CRITICAL) Check for Replay Attack
         // -----------------------------------------------------------------
-        let isVerified: boolean;
+        // Has this signature already been used to claim points?
+        const { count, error: countError } = await supabase
+            .from("contributions")
+            .select("*", { count: "exact", head: true })
+            .eq("transaction_id", signature);
+
+        if (countError) throw countError;
+        if (count !== null && count > 0) {
+            return NextResponse.json(
+                { error: "This transaction has already been recorded." },
+                { status: 400 }
+            );
+        }
+
+        // -----------------------------------------------------------------
+        // 4. Fetch and Verify the Transaction from the Blockchain
+        // -----------------------------------------------------------------
+        let tx;
         try {
-            // Convert the message string to a Uint8Array (bytes)
-            const messageBytes = new TextEncoder().encode(message);
-
-            // Decode the base58 signature to bytes
-            const signatureBytes = bs58.decode(signature);
-
-            // Decode the base58 public key (wallet address) to bytes
-            const publicKeyBytes = bs58.decode(userWalletAddress);
-
-            // Verify the signature
-            isVerified = nacl.sign.detached.verify(messageBytes, signatureBytes, publicKeyBytes);
+            tx = await connection.getTransaction(signature, {
+                maxSupportedTransactionVersion: 0, // Required for new transaction formats
+            });
         } catch (error) {
-            // This will catch errors from bs58.decode (e.g., "Invalid base58 string")
-            return res.status(400).json({ error: "Invalid signature or wallet format." });
+            return NextResponse.json(
+                { error: `Failed to fetch transaction. It may not be confirmed. ${error}` },
+                { status: 400 }
+            );
         }
 
-        if (!isVerified) {
-            return res.status(401).json({ error: "Signature verification failed." });
+        if (!tx) {
+            return NextResponse.json(
+                { error: "Transaction not found or not yet confirmed." },
+                { status: 400 }
+            );
         }
 
-        // --- Signature is VALID ---
+        if (tx.meta?.err) {
+            return NextResponse.json({ error: "Transaction failed on-chain." }, { status: 400 });
+        }
 
         // -----------------------------------------------------------------
-        // 2. Find user profile by wallet address (same as before)
+        // 5. Verify the Signer (Fee Payer)
+        // -----------------------------------------------------------------
+        const signer = tx.transaction.message.getAccountKeys().staticAccountKeys[0].toBase58();
+        console.log("Transaction signer:", signer);
+        if (signer !== userWalletAddress) {
+            return NextResponse.json(
+                { error: "Transaction signer does not match user." },
+                { status: 401 }
+            );
+        }
+
+        // -----------------------------------------------------------------
+        // 6. Parse Balances to Find *Actual* Contributions (Source of Truth)
+        // -----------------------------------------------------------------
+        // We will build our own 'tokens' array based on what *actually* happened.
+        const verifiedContributions = [];
+
+        // Map pre-balances by account index for easy lookup
+        const preBalancesMap = new Map<number, bigint>();
+        for (const b of tx.meta!.preTokenBalances || []) {
+            preBalancesMap.set(b.accountIndex, BigInt(b.uiTokenAmount.amount));
+        }
+
+        // Loop through post-balances to see what the dev wallet *received*
+        for (const postBalance of tx.meta!.postTokenBalances || []) {
+            // Check if this token account is owned by the dev wallet
+            if (postBalance.owner !== DEV_WALLET_PK_STRING) {
+                continue;
+            }
+
+            const preBalance = BigInt(preBalancesMap.get(postBalance.accountIndex) || 0);
+            const postBalanceAmount = BigInt(postBalance.uiTokenAmount.amount);
+
+            // Calculate the amount *received*
+            const amountReceived = postBalanceAmount - preBalance;
+
+            if (amountReceived > 0) {
+                verifiedContributions.push({
+                    mint: postBalance.mint,
+                    amount: Number(amountReceived), // Convert bigint back to number for JSON/DB
+                });
+            }
+        }
+
+        if (verifiedContributions.length === 0) {
+            return NextResponse.json(
+                { error: "No valid token transfers to dev wallet found." },
+                { status: 400 }
+            );
+        }
+
+        // -----------------------------------------------------------------
+        // 7. Find User Profile
         // -----------------------------------------------------------------
         const { data: profile, error: profileError } = await supabase
             .from("profiles")
@@ -64,37 +134,35 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             .single();
 
         if (profileError || !profile) {
-            return res.status(404).json({ error: "User profile not found." });
-        }
-
-        const userId = profile.id;
-
-        // -----------------------------------------------------------------
-        // 3. Call the atomic database function (same as before)
-        // -----------------------------------------------------------------
-        const { data: pointsEarned, error: rpcError } = await supabase.rpc(
-            "record_contributions_and_calculate_points",
-            {
-                p_user_id: userId,
-                p_tokens: tokens,
-                p_signature: signature, // We store the base58 signature
-            }
-        );
-
-        if (rpcError) {
-            throw rpcError;
+            return NextResponse.json({ error: "User profile not found." }, { status: 404 });
         }
 
         // -----------------------------------------------------------------
-        // 4. Return the successful result (same as before)
+        // 8. Call the Atomic Database Function (This SQL doesn't change!)
         // -----------------------------------------------------------------
-        return res.status(200).json({
-            message: "Contribution recorded successfully.",
-            pointsEarned: pointsEarned,
+        // We pass the *verified* contributions, not the client's alleged ones.
+        const { data: pointsEarned, error: rpcError } = await supabase.rpc("record_contributions", {
+            p_user_id: profile.id,
+            p_tokens: verifiedContributions, // <-- Pass the VERIFIED array
+            p_signature: signature,
         });
+
+        if (rpcError) throw rpcError;
+
+        // 9. Return Success
+        return NextResponse.json(
+            {
+                message: "Contribution recorded successfully.",
+                pointsEarned: pointsEarned,
+            },
+            { status: 200 }
+        ); // <-- Success response
     } catch (error) {
         console.error("Error in /api/record-contribution:", error);
         const errorMessage = error instanceof Error ? error.message : "An unknown error occurred.";
-        return res.status(500).json({ error: "Internal Server Error", details: errorMessage });
+        return NextResponse.json(
+            { error: "Internal Server Error", details: errorMessage },
+            { status: 500 }
+        );
     }
 }

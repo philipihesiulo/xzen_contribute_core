@@ -98,7 +98,7 @@ export const TokenSelection = ({ isMobile, tokens, isLoading, error }: TokenSele
                                         </td>
                                         <td className="p-4">{token.balance}</td>
                                         <td className="p-4 text-muted-foreground">
-                                            {shortenAddress(token.mint)}
+                                            {token.mint ? shortenAddress(token.mint) : "No Mint"}
                                         </td>
                                         {!isMobile && (
                                             <td className="p-4">

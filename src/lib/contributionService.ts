@@ -6,31 +6,8 @@ import {
 } from "@solana/spl-token";
 import { WalletContextState } from "@solana/wallet-adapter-react";
 import { ContributionToken } from "@/types/token";
+import { ContributionResponse } from "@/types/contribution";
 
-async function recordContribution(
-    userWalletAddress: string,
-    signature: string,
-    message: string, // <-- This parameter was missing
-    tokens: ContributionToken[]
-): Promise<void> {
-    const response = await fetch("/api/record-contribution", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-            userWalletAddress,
-            signature,
-            message, // <-- It must be included in the body
-            tokens,
-        }),
-    });
-
-    if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || "Failed to record contribution on the backend.");
-    }
-
-    console.log("Backend contribution recorded successfully.");
-}
 const DEV_WALLET_ADDRESS = process.env.NEXT_PUBLIC_DEVELOPER_WALLET_ADDRESS;
 
 /**
@@ -42,11 +19,34 @@ const DEV_WALLET_ADDRESS = process.env.NEXT_PUBLIC_DEVELOPER_WALLET_ADDRESS;
  * @returns The signature of the confirmed transaction.
  * @throws If any step in the process fails.
  */
+
+async function recordContribution(
+    userWalletAddress: string,
+    signature: string // The transaction ID
+    // The 'tokens' array is no longer needed here
+): Promise<ContributionResponse> {
+    const response = await fetch("/api/record-contribution", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        // Send *only* the address and signature
+        body: JSON.stringify({ userWalletAddress, signature }),
+    });
+
+    if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to record contribution on the backend.");
+    }
+
+    const { message, pointsEarned } = await response.json();
+
+    return { message, pointsEarned };
+}
+
 export async function handleContribute(
     connection: Connection,
     wallet: WalletContextState,
     tokens: ContributionToken[]
-): Promise<string> {
+): Promise<ContributionResponse> {
     if (!wallet.publicKey || !wallet.signTransaction) {
         throw new Error("Wallet is not connected or does not support signing.");
     }
@@ -119,8 +119,7 @@ export async function handleContribute(
     // 5. Send the transaction
     const signature = await connection.sendRawTransaction(signedTransaction.serialize());
 
-    // 6. Confirm the transaction (THE NEW WAY)
-    // --- THIS IS THE SECOND CHANGE ---
+    // 6. Confirm the transaction
     // Use the new strategy object
     await connection.confirmTransaction(
         {
@@ -134,7 +133,7 @@ export async function handleContribute(
     console.log("Transaction confirmed with signature:", signature);
 
     // 7. Call backend to record contribution and calculate rewards
-    //await recordContribution(userPublicKey.toBase58(), signature, tokens);
+    const { message, pointsEarned } = await recordContribution(userPublicKey.toBase58(), signature);
 
-    return signature;
+    return { signature, message, pointsEarned };
 }

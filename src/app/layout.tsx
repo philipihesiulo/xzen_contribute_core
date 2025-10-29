@@ -6,6 +6,7 @@ import "../index.css";
 import "@solana/wallet-adapter-react-ui/styles.css";
 import { WalletContextProvider } from "@/providers/WalletContextProvider";
 import { ErrorToast } from "@/components/ErrorToast";
+import { GlobalModal } from "@/components/GlobalModal";
 import { Toaster } from "@/components/ui/toaster";
 import { QueryContextProvider } from "@/providers/QueryContextProvider";
 
@@ -32,6 +33,7 @@ export default function RootLayout({
                 </QueryContextProvider>
                 <ErrorToast />
                 <Toaster />
+                <GlobalModal />
             </body>
         </html>
     );

@@ -72,5 +72,5 @@ AS $$
 $$;
 
 -- Grant execute permission so your other functions (and app) can use it
-GRANT EXECUTE ON FUNCTION public.calculate_points(uuid, text[]) TO authenticated;
-GRANT EXECUTE ON FUNCTION public.calculate_points(uuid, text[]) TO service_role;
+GRANT EXECUTE ON FUNCTION public.calculate_xzen_points(uuid, text[]) TO authenticated;
+GRANT EXECUTE ON FUNCTION public.calculate_xzen_points(uuid, text[]) TO service_role;
