@@ -41,7 +41,9 @@ export default function Dashboard() {
     ];
 
     return (
-        <DashboardLayout pageTitle="Dashboard" noBackButton={true}>
+        <DashboardLayout
+            pageTitle="Dashboard"
+            noBackButton={true}>
             {/* User Stats */}
 
             {/* Main Content Grid */}
@@ -81,16 +83,13 @@ export default function Dashboard() {
                         {stats.map((stat, index) => (
                             <Card
                                 key={index}
-                                className="bg-card bg-white/10 border-border p-2 pt-6 pb-6"
-                            >
+                                className="bg-card bg-white/10 border-border p-2 pt-6 pb-6">
                                 <div className="flex items-start gap-4">
                                     <div className="flex h-12 w-12 items-center justify-center rounded-lg">
                                         <stat.icon className="h-6 w-6 text-white" />
                                     </div>
                                     <div className="flex-1">
-                                        <h3 className="text-xl font-bold">
-                                            {stat.value}
-                                        </h3>
+                                        <h3 className="text-xl font-bold">{stat.value}</h3>
                                         <p className="text-sm text-muted-foreground">
                                             {stat.label}
                                         </p>
@@ -117,9 +116,7 @@ export default function Dashboard() {
                 <div className="mt-6 lg:mt-0">
                     {/* Referral Summary */}
                     <Card className="bg-card border-border p-6">
-                        <h3 className="mb-4 text-lg font-semibold">
-                            Referral Summary
-                        </h3>
+                        <h3 className="mb-4 text-lg font-semibold">Referral Summary</h3>
                         <div className="flex flex-col md:flex-row items-center justify-between gap-4">
                             <div>
                                 <div className="mb-4 space-y-2">
@@ -138,21 +135,15 @@ export default function Dashboard() {
 
                         <div className="space-y-3 text-sm">
                             <div className="flex justify-between">
-                                <span className="text-muted-foreground">
-                                    Total Referrals
-                                </span>
+                                <span className="text-muted-foreground">Total Referrals</span>
                                 <span className="font-medium">129</span>
                             </div>
                             <div className="flex justify-between">
-                                <span className="text-muted-foreground">
-                                    Active Referrals
-                                </span>
+                                <span className="text-muted-foreground">Active Referrals</span>
                                 <span className="font-medium">12</span>
                             </div>
                             <div className="flex justify-between">
-                                <span className="text-muted-foreground">
-                                    Referral Earnings
-                                </span>
+                                <span className="text-muted-foreground">Referral Earnings</span>
                                 <span className="font-medium">350 XZN</span>
                             </div>
                         </div>
@@ -161,9 +152,7 @@ export default function Dashboard() {
                     {/* Leaderboard Preview */}
                     <Card className="bg-card border-border mt-6">
                         <div className="flex items-center justify-between border-b border-border p-6">
-                            <h3 className="text-lg font-semibold">
-                                Leaderboard
-                            </h3>
+                            <h3 className="text-lg font-semibold">Leaderboard</h3>
                             <button className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground">
                                 This Week <ChevronDown className="h-4 w-4" />
                             </button>
@@ -174,20 +163,15 @@ export default function Dashboard() {
                                     7
                                 </div>
                                 <div>
-                                    <div className="text-sm text-muted-foreground">
-                                        7x8k...mN3p
-                                    </div>
-                                    <div className="font-bold">
-                                        Your Rank: 146
-                                    </div>
+                                    <div className="text-sm text-muted-foreground">7x8k...mN3p</div>
+                                    <div className="font-bold">Your Rank: 146</div>
                                 </div>
                             </div>
                             <div className="space-y-3">
                                 {leaderboard.map((item) => (
                                     <div
                                         key={item.rank}
-                                        className="flex items-center justify-between text-sm"
-                                    >
+                                        className="flex items-center justify-between text-sm">
                                         <div className="flex items-center gap-3">
                                             <div className="flex h-6 w-6 items-center justify-center rounded-full bg-primary/10 text-xs font-medium">
                                                 {item.rank}
@@ -196,9 +180,7 @@ export default function Dashboard() {
                                                 {item.username}
                                             </span>
                                         </div>
-                                        <span className="font-medium">
-                                            {item.points}
-                                        </span>
+                                        <span className="font-medium">{item.points}</span>
                                     </div>
                                 ))}
                             </div>

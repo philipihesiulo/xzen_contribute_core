@@ -6,7 +6,6 @@ import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { useAuth } from "../providers/AuthProvider";
 import { useEffect } from "react";
-import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
 
 export default function Home() {
     const router = useRouter();
@@ -75,15 +74,6 @@ export default function Home() {
                     {isConnected ? "Connecting..." : "Connect Wallet"}
                     <ArrowRight className="ml-2 h-5 w-5" />
                 </Button>
-                {/* <Button
-                    onClick={() => {
-                        throw new Error("Test Error from UI");
-                    }}
-                    size="lg"
-                    className="gradient-primary h-14 px-12 text-base font-semibold shadow-glow mt-4"
-                >
-                    Throw Test Error
-                </Button> */}
             </div>
         </div>
     );

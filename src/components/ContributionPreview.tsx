@@ -1,17 +1,67 @@
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { ContributionToken } from "@/types/token";
+import { useWallet, useConnection } from "@solana/wallet-adapter-react";
+import { useContributionStore } from "@/stores/contributionStore";
+import { useModalStore } from "@/stores/modalStore";
+import { useEffect } from "react";
+import Image from "next/image";
 
-interface ContributionPreviewProps {
-    contribution: ContributionToken[];
-    handleAmountChange: (_mint: string, _newAmount: number) => void;
-}
+export default function ContributionPreview() {
+    const { selected, status, response, error, handleAmountChange, handleContribute } =
+        useContributionStore();
+    const wallet = useWallet();
+    const { connection } = useConnection();
+    const { openModal } = useModalStore();
 
-export default function ContributionPreview({
-    contribution,
-    handleAmountChange,
-}: ContributionPreviewProps) {
+    useEffect(() => {
+        if (status === "success") {
+            openModal({
+                title: "Your contribution was successful!",
+                body: successMessage(),
+            });
+        } else if (status === "failed" || error) {
+            openModal({
+                title: "Contribution Failed",
+                body: (
+                    <div>
+                        <h1>Pls try again!</h1>
+                        <p className="mt-6 mb-6">
+                            If the error persists, try to refresh the page and contribute a
+                            different set of tokens.
+                        </p>
+                        <p className="mt-6 text-red-500">{error ? error.toString() : ""}</p>
+                    </div>
+                ),
+            });
+        }
+    }, [status]);
+
+    const successMessage = () => {
+        return (
+            <div>
+                <div className="flex items-center gap-3">
+                    <div className="flex h-12 w-12 items-center justify-center rounded-lg">
+                        <Image
+                            src="/medal.svg"
+                            alt="Medal Icon"
+                            width={50}
+                            height={50}
+                            className="text-primary"
+                        />
+                    </div>
+                    <div>
+                        <p className="text-sm text-muted-foreground">XZN Points Earned</p>
+                        <h2 className="text-3xl font-bold">{response?.pointsEarned} XZN</h2>
+                    </div>
+                </div>
+                <div>
+                    <p>Comeback tomorrow to earn more points</p>
+                </div>
+            </div>
+        );
+    };
+
     return (
         <>
             {/* Contribution Preview */}
@@ -20,16 +70,18 @@ export default function ContributionPreview({
                     <h2 className="mb-6 text-lg font-semibold">Contribution Preview</h2>
 
                     <div className="mb-6 space-y-3">
-                        {contribution.map((token) => (
+                        {selected.map((token) => (
                             <div
                                 key={token.mint}
                                 className="flex items-center justify-between rounded-lg bg-secondary p-3">
                                 <div className="flex items-center gap-2">
                                     <div className="h-8 w-8 rounded-full bg-primary/20" />
                                     <div>
-                                        <div className="font-medium">{token.name}</div>
-                                        <div className="text-xs text-muted-foreground">
-                                            {token.reward}
+                                        <div className="font-medium">{token.symbol}</div>
+                                        <div className="">
+                                            <p className="text-xs text-accent">
+                                                +{token.reward} XZN
+                                            </p>
                                         </div>
                                     </div>
                                 </div>
@@ -37,12 +89,10 @@ export default function ContributionPreview({
                                 <div className="text-right">
                                     <Input
                                         type="number"
-                                        value={token.amount}
+                                        max={token.balance}
+                                        value={token.balance > 100 ? token.amount : token.balance}
                                         onChange={(e) =>
-                                            handleAmountChange(
-                                                token.mint,
-                                                parseInt(e.target.value, 10)
-                                            )
+                                            handleAmountChange(token, parseInt(e.target.value, 10))
                                         }
                                         className="w-24 text-right text-lg font-semibold"
                                     />
@@ -69,7 +119,7 @@ export default function ContributionPreview({
                     <div className="mb-6 space-y-2 border-t border-border pt-4">
                         <div className="flex justify-between">
                             <span className="text-muted-foreground">Total Contribution</span>
-                            <span className="font-bold">3 Tokens</span>
+                            <span className="font-bold">{selected.length} Tokens</span>
                         </div>
                         <div className="flex justify-between">
                             <span className="text-muted-foreground">Total Reward</span>
@@ -77,8 +127,11 @@ export default function ContributionPreview({
                         </div>
                     </div>
 
-                    <Button className="gradient-primary w-full shadow-glow">
-                        Confirm Contribution
+                    <Button
+                        className="gradient-primary w-full shadow-glow"
+                        onClick={async () => await handleContribute(connection, wallet, selected)}
+                        disabled={!wallet.publicKey}>
+                        {wallet.publicKey ? "Confirm Contribution" : "Wallet not connected"}
                     </Button>
                 </Card>
             </div>

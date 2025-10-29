@@ -1,15 +1,14 @@
 "use client";
 
 import { useIsMobile } from "@/hooks/useMobile";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import DashboardLayout from "../dashboard-layout";
 import { useTokenDiscovery, useTokensMetadata } from "@/hooks/useTokenDiscovery";
-import { ContributionToken, Token } from "@/types/token";
+import { Token } from "@/types/token";
 import { TokenSelection } from "@/components/TokenSelection";
 import ContributionPreview from "@/components/ContributionPreview";
 
 const Contribute = () => {
-    const [contribution, setContribution] = useState<ContributionToken[]>([]);
     const isMobile = useIsMobile();
     const { tokens, isLoading, error } = useTokenDiscovery();
     const {
@@ -36,24 +35,6 @@ const Contribute = () => {
         }
     }, [tokens, tokensMetadata]);
 
-    const handleAmountChange = (mint: string, newAmount: number) => {
-        setContribution((prev) =>
-            prev.map((token) => (token.mint === mint ? { ...token, amount: newAmount } : token))
-        );
-    };
-
-    const addTokenToContribution = (token: Token | ContributionToken) => {
-        const contributionToken: ContributionToken = { ...token, amount: 100 };
-        setContribution((prev) => [...prev, contributionToken]);
-    };
-
-    const removeTokenFromContribution = (mint: string) => {
-        setContribution((prev) => prev.filter((token) => token.mint !== mint));
-    };
-
-    const isTokenAdded = (mint: string) => {
-        return contribution.some((token) => token.mint === mint);
-    };
     const pageDescription = (
         <>
             Select the tokens you want to contribute. <br />
@@ -74,10 +55,7 @@ const Contribute = () => {
                     error={error}
                 />
                 {/* Contribution Preview */}
-                <ContributionPreview
-                    contribution={contribution}
-                    handleAmountChange={handleAmountChange}
-                />
+                <ContributionPreview />
             </div>
         </DashboardLayout>
     );

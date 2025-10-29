@@ -3,10 +3,7 @@
 import React, { FC, createContext, useContext, useMemo } from "react";
 import { useWalletModal } from "@solana/wallet-adapter-react-ui";
 import { useWallet } from "@solana/wallet-adapter-react";
-import {
-    signInWithSolana,
-    signOut as supabaseSignOut,
-} from "@/lib/authService";
+import { signInWithSolana, signOut as supabaseSignOut } from "@/lib/authService";
 import { useUser } from "@/hooks/useUser";
 import { UserProfile } from "@/types/user";
 
@@ -30,10 +27,7 @@ export const AuthProvider: FC<AuthProviderProps> = ({ children }) => {
     const wallet = useWallet();
     const { publicKey, connected, disconnect } = wallet;
     const { setVisible } = useWalletModal();
-    const walletAddress = useMemo(
-        () => publicKey?.toBase58() || null,
-        [publicKey]
-    );
+    const walletAddress = useMemo(() => publicKey?.toBase58() || null, [publicKey]);
 
     const signIn = async () => {
         if (!connected) {
@@ -73,9 +67,7 @@ export const AuthProvider: FC<AuthProviderProps> = ({ children }) => {
         [user, walletAddress, isLoading, connected, signIn, signOut]
     );
 
-    return (
-        <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
-    );
+    return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
 
 export const useAuth = () => {

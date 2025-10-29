@@ -4,6 +4,7 @@ import { ExternalLink } from "lucide-react";
 import { shortenAddress } from "@/lib/utils";
 import Image from "next/image";
 import { Token } from "@/types/token";
+import { SelectTokenButton } from "./SelectTokenButton";
 
 interface TokenSelectionProps {
     isMobile: boolean;
@@ -92,18 +93,16 @@ export const TokenSelection = ({ isMobile, tokens, isLoading, error }: TokenSele
                                                 </Button>
                                             </td>
                                         )}
-                                        <td className="p-4 font-medium text-accent">+50 XZN</td>
+                                        <td className="p-4 font-medium text-accent">
+                                            +{token.reward} XZN
+                                        </td>
                                         <td className="p-4">{token.balance}</td>
                                         <td className="p-4 text-muted-foreground">
-                                            {shortenAddress(token.mint)}
+                                            {token.mint ? shortenAddress(token.mint) : "No Mint"}
                                         </td>
                                         {!isMobile && (
                                             <td className="p-4">
-                                                <Button
-                                                    size="sm"
-                                                    className="gradient-primary">
-                                                    Add
-                                                </Button>
+                                                <SelectTokenButton token={token} />
                                             </td>
                                         )}
                                     </tr>
