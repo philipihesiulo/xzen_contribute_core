@@ -3,8 +3,11 @@ import { Button } from "@/components/ui/button";
 import { ExternalLink } from "lucide-react";
 import { shortenAddress } from "@/lib/utils";
 import Image from "next/image";
+import Link from "next/link";
 import { Token } from "@/types/token";
+import { useUserStore } from "@/stores/userStore";
 import { SelectTokenButton } from "./SelectTokenButton";
+import LoadingSpinner from "./LoadingSpinner";
 
 interface TokenSelectionProps {
     isMobile: boolean;
@@ -14,16 +17,21 @@ interface TokenSelectionProps {
 }
 
 export const TokenSelection = ({ isMobile, tokens, isLoading, error }: TokenSelectionProps) => {
-    // Component implementation
+    const { userProfile } = useUserStore();
+
     return (
         <div className="col-span-2">
             {/* Token Selection */}
             <Card className="bg-card border-border">
                 <div className="flex items-center justify-between border-b border-border p-6">
                     <h2 className="text-lg font-semibold">Select Tokens To Contribute</h2>
-                    <button className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground">
-                        View on Solana Explorer <ExternalLink className="h-4 w-4" />
-                    </button>
+                    <Link
+                        href={`https://solscan.io/account/${userProfile?.wallet_address}`}
+                        target="_blank">
+                        <button className="cursor-pointer flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground">
+                            View on Solana Explorer <ExternalLink className="h-4 w-4" />
+                        </button>
+                    </Link>
                 </div>
                 <div className="overflow-x-auto">
                     <table className="w-full">
@@ -44,6 +52,7 @@ export const TokenSelection = ({ isMobile, tokens, isLoading, error }: TokenSele
                                         colSpan={5}
                                         className="p-4 text-center">
                                         Loading tokens...
+                                        <LoadingSpinner />
                                     </td>
                                 </tr>
                             ) : error ? (

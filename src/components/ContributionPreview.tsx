@@ -4,38 +4,67 @@ import { Input } from "@/components/ui/input";
 import { useWallet, useConnection } from "@solana/wallet-adapter-react";
 import { useContributionStore } from "@/stores/contributionStore";
 import { useModalStore } from "@/stores/modalStore";
+import { STATUS } from "@/types/contribution";
 import { useEffect } from "react";
 import Image from "next/image";
+import LoadingSpinner from "@/components/LoadingSpinner";
 
 export default function ContributionPreview() {
-    const { selected, status, response, error, handleAmountChange, handleContribute } =
-        useContributionStore();
+    const {
+        selected,
+        status,
+        response,
+        error,
+        totalReward,
+        resetStatus,
+        handleAmountChange,
+        handleContribute,
+    } = useContributionStore();
     const wallet = useWallet();
     const { connection } = useConnection();
     const { openModal } = useModalStore();
 
     useEffect(() => {
-        if (status === "success") {
-            openModal({
-                title: "Your contribution was successful!",
-                body: successMessage(),
-            });
-        } else if (status === "failed" || error) {
-            openModal({
-                title: "Contribution Failed",
-                body: (
-                    <div>
-                        <h1>Pls try again!</h1>
-                        <p className="mt-6 mb-6">
-                            If the error persists, try to refresh the page and contribute a
-                            different set of tokens.
-                        </p>
-                        <p className="mt-6 text-red-500">{error ? error.toString() : ""}</p>
-                    </div>
-                ),
-            });
+        switch (status) {
+            case STATUS.LOADING:
+                openModal({
+                    title: "Transaction in Progress. Please wait!",
+                    body: <LoadingSpinner />,
+                });
+                break;
+            case STATUS.SUCCESS:
+                openModal({
+                    title: "Your contribution was successful!",
+                    body: successMessage(),
+                });
+                resetStatus();
+                break;
+            case STATUS.FAILED:
+                if (error) {
+                    openModal({
+                        title: "Contribution Failed",
+                        body: errorMessage(),
+                    });
+                    resetStatus();
+                }
+                break;
+            default:
+                break;
         }
     }, [status]);
+
+    const errorMessage = () => {
+        return (
+            <div>
+                <h1>Pls try again!</h1>
+                <p className="mt-6 mb-6">
+                    If the error persists, try to refresh the page and contribute a different set of
+                    tokens.
+                </p>
+                <p className="mt-6 text-red-500">{error ? error.toString() : ""}</p>
+            </div>
+        );
+    };
 
     const successMessage = () => {
         return (
@@ -103,13 +132,11 @@ export default function ContributionPreview() {
 
                     <div className="mb-6 space-y-2 border-t border-border pt-4">
                         <div className="flex justify-between text-sm">
-                            <span className="text-accent">You will receive 230 XZN Points</span>
+                            <span className="text-accent">You will receive 0 Bonus XZN Points</span>
                         </div>
                         <div className="flex justify-between text-sm">
                             <span className="text-accent">+10% Streak Bonus</span>
-                            <span className="text-xs text-muted-foreground">
-                                Transaction in progress
-                            </span>
+                            <span className="text-xs text-muted-foreground">{`[Coming Soon]`}</span>
                         </div>
                         <div className="mt-2 h-1 overflow-hidden rounded-full bg-secondary">
                             <div className="h-full w-3/4 bg-gradient-to-r from-primary to-accent" />
@@ -123,7 +150,7 @@ export default function ContributionPreview() {
                         </div>
                         <div className="flex justify-between">
                             <span className="text-muted-foreground">Total Reward</span>
-                            <span className="font-bold">230 XZN Points</span>
+                            <span className="font-bold text-accent">{totalReward} XZN Points</span>
                         </div>
                     </div>
 

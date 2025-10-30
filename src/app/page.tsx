@@ -6,18 +6,23 @@ import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { useAuth } from "../providers/AuthProvider";
 import { useEffect } from "react";
+import LoadingSpinner from "@/components/LoadingSpinner";
+import { useModalStore } from "@/stores/modalStore";
 
 export default function Home() {
     const router = useRouter();
     const { signIn, isConnected, user } = useAuth();
+    const { openModal, closeModal } = useModalStore();
 
     useEffect(() => {
-        console.log("isConnected:", isConnected);
-        console.log("user:", user);
         if (isConnected && !user) {
-            console.log("Signing in user...");
+            openModal({
+                title: "Approve the wallet message to continue...",
+                body: <LoadingSpinner />,
+            });
             (async () =>
                 await signIn().then(() => {
+                    closeModal();
                     router.push("/dashboard");
                 }))();
         } else if (user) {

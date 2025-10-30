@@ -1,9 +1,22 @@
 import { Wallet, Copy } from "lucide-react";
-import { useUser } from "@/hooks/useUser";
 import { shortenAddress } from "@/lib/utils";
+import { useUserStore } from "@/stores/userStore";
+import { useEffect } from "react";
+import { useConnection } from "@solana/wallet-adapter-react";
 
 export function WalletBalance() {
-    const { user } = useUser();
+    const { walletBalance, userProfile: user, setWalletBalance } = useUserStore();
+    const { connection } = useConnection();
+
+    useEffect(() => {
+        if (!walletBalance && user) {
+            (async () => {
+                await setWalletBalance(user.wallet_address, connection);
+            })();
+            console.log(walletBalance);
+        }
+    }, [user, walletBalance]);
+
     return (
         <div className="flex items-center gap-3 rounded-lg bg-card px-4 py-3 border border-border">
             <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/20">
@@ -20,7 +33,7 @@ export function WalletBalance() {
                     </button>
                 </div>
                 {/* Wallet Balance */}
-                <div className="text-lg font-bold">SOL 105,000</div>
+                <div className="text-lg font-bold">SOL {walletBalance || 0}</div>
             </div>
         </div>
     );

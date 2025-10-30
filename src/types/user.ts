@@ -11,4 +11,5 @@ export type UserProfile = {
     referred_by: string | null;
     created_at: string;
     updated_at: string;
+    wallet_balance?: number;
 };

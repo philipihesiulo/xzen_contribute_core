@@ -12,10 +12,12 @@ export enum STATUS {
     "PENDING" = "pending",
     "SUCCESS" = "success",
     "FAILED" = "failed",
+    "LOADING" = "loading",
 }
 
 export interface ContributionStoreState {
     selected: ContributionToken[];
+    totalReward: number;
     status: STATUS;
     response: ContributionResponse;
     error: Error | null;
@@ -23,6 +25,7 @@ export interface ContributionStoreState {
     removeTokenFromContribution: (mint: string) => void;
     handleAmountChange: (token: ContributionToken, newAmount: number) => void;
     isTokenAdded: (mint: string) => boolean;
+    resetStatus: () => void;
     clearContribution: () => void;
     handleContribute: (
         connection: Connection,
