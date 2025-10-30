@@ -1,10 +1,15 @@
 import { create } from "zustand";
-import { ContributionToken, Token } from "@/types/token";
+import { ContributionToken } from "@/types/token";
 import { handleContribute } from "@/lib/contributionService";
 import { ContributionStoreState, STATUS } from "@/types/contribution";
 
+const calculateTotalPoints = (tokens: ContributionToken[]): number => {
+    return tokens.reduce((total, token) => total + token.reward, 0);
+};
+
 export const useContributionStore = create<ContributionStoreState>((set, get) => ({
     selected: [],
+    totalReward: 0,
     status: STATUS.PENDING,
     response: { message: "", pointsEarned: 0 },
     error: null,
@@ -16,13 +21,14 @@ export const useContributionStore = create<ContributionStoreState>((set, get) =>
         set((state) => ({
             selected: [...state.selected, contributionToken],
         }));
-        console.log(get().selected);
+        set((state) => ({
+            totalReward: calculateTotalPoints(state.selected),
+        }));
     },
     removeTokenFromContribution: (mint) => {
         set((state) => ({
             selected: state.selected.filter((token) => token.mint !== mint),
         }));
-        console.log(get().selected);
     },
     handleAmountChange: (currentToken, newAmount) => {
         newAmount = newAmount <= currentToken.balance ? newAmount : currentToken.balance;
@@ -36,9 +42,16 @@ export const useContributionStore = create<ContributionStoreState>((set, get) =>
         return get().selected.some((token) => token.mint === mint);
     },
     clearContribution: () => {
-        set({ selected: [] });
+        set({ selected: [], totalReward: 0 });
+        get().resetStatus();
+    },
+    resetStatus: () => {
+        set({ status: STATUS.PENDING });
+        set({ response: { message: "", pointsEarned: 0 } });
+        set({ error: null });
     },
     handleContribute: async (connection, wallet, selected) => {
+        set({ status: STATUS.LOADING });
         await handleContribute(connection, wallet, selected)
             .then((response) => {
                 set({ selected: [] });

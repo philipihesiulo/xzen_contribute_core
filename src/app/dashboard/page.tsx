@@ -7,6 +7,7 @@ import Image from "next/image";
 import DashboardLayout from "../dashboard-layout";
 import { RecentContributions } from "@/components/RecentContributions";
 import { useUser } from "@/hooks/useUser";
+import Link from "next/link";
 
 export default function Dashboard() {
     const { user } = useUser();
@@ -72,9 +73,11 @@ export default function Dashboard() {
                                     </h2>
                                 </div>
                             </div>
-                            <Button className="gradient-primary w-full md:w-auto">
-                                Contribute Now
-                            </Button>
+                            <Link href="/contribute">
+                                <Button className="gradient-primary w-full md:w-auto">
+                                    Contribute Now
+                                </Button>
+                            </Link>
                         </div>
                     </Card>
 
