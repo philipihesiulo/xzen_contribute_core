@@ -1,19 +1,19 @@
 "use client";
 
-import React, { FC, createContext, useContext, useMemo } from "react";
+import React, { FC, createContext, useContext, useEffect, useMemo } from "react";
 import { useWalletModal } from "@solana/wallet-adapter-react-ui";
 import { useWallet } from "@solana/wallet-adapter-react";
-import { signInWithSolana, signOut as supabaseSignOut } from "@/lib/authService";
-import { useUser } from "@/hooks/useUser";
-import { UserProfile } from "@/types/user";
+import { supabase } from "@/lib/supabaseClient";
+import { SolanaWallet } from "@supabase/supabase-js";
+import { useUserStore } from "@/stores/userStore";
+import LoadingSpinner from "@/components/LoadingSpinner";
+import { useModalStore } from "@/stores/modalStore";
+import { useRouter } from "next/navigation";
 
 interface AuthContextType {
-    user: UserProfile | null | undefined;
-    walletAddress: string | null;
-    isLoading: boolean;
-    signIn: () => Promise<void>;
+    connectWallet: () => void;
     signOut: () => Promise<void>;
-    isConnected: boolean;
+    walletConnected: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -23,48 +23,78 @@ interface AuthProviderProps {
 }
 
 export const AuthProvider: FC<AuthProviderProps> = ({ children }) => {
-    const { user, isLoading } = useUser();
     const wallet = useWallet();
-    const { publicKey, connected, disconnect } = wallet;
+    const { connected, disconnect } = wallet;
     const { setVisible } = useWalletModal();
-    const walletAddress = useMemo(() => publicKey?.toBase58() || null, [publicKey]);
+    const { authUser, userProfile, clearUser } = useUserStore();
+    const { openModal, closeModal } = useModalStore();
+    const router = useRouter();
 
-    const signIn = async () => {
+    useEffect(() => {
+        console.log("User Auth", authUser);
+        console.log("User Profile", userProfile);
+        console.log("Auth User", authUser);
+        console.log("Connected", connected);
+        if (connected && !authUser) {
+            openModal({
+                title: "Approve the wallet message to continue...",
+                body: <LoadingSpinner />,
+            });
+            (async () => {
+                await signIn();
+            })();
+        } else if (connected && authUser) {
+            closeModal();
+            router.push("/dashboard");
+        }
+    }, [connected, authUser]);
+
+    const connectWallet = () => {
         if (!connected) {
             setVisible(true);
-            return;
         }
+    };
 
+    const signIn = async () => {
         try {
-            console.log("About to signin user...");
-            await signInWithSolana(wallet);
+            if (!wallet.connected || !wallet.publicKey) {
+                throw new Error("Wallet not connected or public key not available.");
+            }
+            const address = wallet.publicKey.toBase58();
+
+            const message = `Sign in to Xzenlabs Contribute with wallet ${address} at ${new Date().toISOString()}`;
+            console.log("About To");
+            await supabase.auth.signInWithWeb3({
+                chain: "solana",
+                statement: message,
+                wallet: wallet as SolanaWallet,
+            });
         } catch (error) {
-            console.error("Failed to sign in:", error);
-            throw new Error("Wallet not ready for signing.");
+            console.error("Error signing in with Solana:", error);
+            throw error;
         }
     };
 
     const signOut = async () => {
-        try {
-            await supabaseSignOut();
-            if (connected) {
-                await disconnect();
-            }
-        } catch (error) {
-            throw Error(`Failed to sign out: ${error}`);
+        if (connected) {
+            console.log("Disconnecting wallet...");
+            await disconnect();
+        }
+        clearUser();
+        const { error } = await supabase.auth.signOut();
+        if (error) {
+            console.error("Error signing out:", error.message);
+            throw error;
         }
     };
 
     const value = useMemo(
         () => ({
-            user,
-            walletAddress,
-            isLoading,
-            signIn,
+            connectWallet,
             signOut,
-            isConnected: connected,
+            walletConnected: connected,
         }),
-        [user, walletAddress, isLoading, connected, signIn, signOut]
+        [connected, connectWallet, signOut]
     );
 
     return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

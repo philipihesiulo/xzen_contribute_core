@@ -1,12 +1,14 @@
 "use client";
 
-import { useAuth } from "@/providers/AuthProvider";
+import { useUserStore } from "@/stores/userStore";
 import { useRouter } from "next/navigation";
 import { useEffect, ComponentType } from "react";
 
 const withAuth = <P extends object>(WrappedComponent: ComponentType<P>) => {
     const WithAuthComponent = (props: P) => {
-        const { user, isLoading } = useAuth();
+        //const { user, isLoading } = useAuth();
+        const { userProfile: user, isLoading } = useUserStore();
+
         const router = useRouter();
 
         useEffect(() => {
