@@ -63,6 +63,10 @@ export const TokenSelection = ({ isMobile, tokens, isLoading, error }: TokenSele
                                         Error loading tokens: {error.message}
                                     </td>
                                 </tr>
+                            ) : !tokens.length ? (
+                                <>
+                                    <p className="p-4 text-center">No tokens found.</p>
+                                </>
                             ) : (
                                 tokens?.map((token, index) => (
                                     <tr

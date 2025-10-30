@@ -68,11 +68,10 @@ export function Sidebar({ onLinkClick }: SidebarProps) {
 
             {/* Disconnect Wallet */}
             <div className="p-4">
-                {/* <WalletDisconnectButton className="gradient-primary h-14 px-12 text-base font-semibold shadow-glow" /> */}
                 <Button
                     onClick={handleSignOut}
                     variant="outline"
-                    className="w-full border-primary/30 text-primary hover:bg-primary/10">
+                    className="w-full border-primary/30 text-primary hover:bg-primary/90">
                     <Wallet className="mr-2 h-4 w-4" />
                     Disconnect Wallet
                 </Button>
