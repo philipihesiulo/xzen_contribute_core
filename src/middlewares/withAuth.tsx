@@ -13,7 +13,6 @@ const withAuth = <P extends object>(WrappedComponent: ComponentType<P>) => {
 
         useEffect(() => {
             if (!user) {
-                console.log("No Aunthenticated User Found");
                 router.push("/");
             }
         }, [user, isLoading, router]);

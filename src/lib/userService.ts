@@ -10,8 +10,6 @@ export const getWalletBalance = async (walletAddress: string) => {
 };
 
 export const getOrCreateUser = async (user: User) => {
-    console.log("Fetching user profile for:", user);
-
     const { data: profile, error } = await supabase
         .from("profiles")
         .select("*")
@@ -23,11 +21,8 @@ export const getOrCreateUser = async (user: User) => {
     }
 
     if (profile) {
-        console.log("Existing user profile found:", profile);
         return profile;
     }
-
-    console.log("Creating new user profile for:", user);
 
     const { data: newUser, error: insertError } = await supabase
         .from("profiles")
@@ -42,7 +37,5 @@ export const getOrCreateUser = async (user: User) => {
     if (insertError) {
         throw insertError;
     }
-    console.log("New user profile created:", newUser);
-
     return newUser;
 };
