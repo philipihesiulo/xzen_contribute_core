@@ -93,5 +93,3 @@ supabase.auth.onAuthStateChange((event, session) => {
         useUserStore.getState().clearUser();
     }
 });
-
-console.log("UserStore Getting called", useUserStore.getState());

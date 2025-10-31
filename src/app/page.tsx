@@ -37,8 +37,6 @@ export default function Home() {
                     />
                 </div>
 
-                <WalletMultiButton />
-
                 {/* Main heading */}
                 <h1 className="mb-6 text-4xl font-bold leading-tight tracking-tight md:text-6xl">
                     Turn your worthless Solana tokens into
