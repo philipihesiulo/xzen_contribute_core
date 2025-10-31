@@ -4,7 +4,6 @@ import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
 import Image from "next/image";
 import { useAuth } from "../providers/AuthProvider";
-import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
 import { useUserStore } from "@/stores/userStore";
 
 export default function Home() {

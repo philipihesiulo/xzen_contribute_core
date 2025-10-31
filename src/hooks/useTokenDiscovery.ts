@@ -111,7 +111,7 @@ export const useTokenDiscovery = () => {
         enabled: !!publicKey,
     });
 
-    return { tokens: data, isLoading, error };
+    return { tokens: data || [], isLoading, error };
 };
 
 export const useTokensMetadata = () => {

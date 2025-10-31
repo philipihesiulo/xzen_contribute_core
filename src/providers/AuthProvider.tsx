@@ -26,13 +26,13 @@ export const AuthProvider: FC<AuthProviderProps> = ({ children }) => {
     const wallet = useWallet();
     const { connected, disconnect } = wallet;
     const { setVisible } = useWalletModal();
-    const { authUser, clearUser, isLoading } = useUserStore();
+    const { authUser, clearUser, isLoading, userProfile } = useUserStore();
     const { openModal, closeModal } = useModalStore();
     const router = useRouter();
 
     useEffect(() => {
         supabase.auth.getSession().then(({ data: { session } }) => {
-            console.log("Session", session);
+            /* TODO: Handle a case when the user fails to  */
 
             if (connected && !session) {
                 openModal({
@@ -46,17 +46,17 @@ export const AuthProvider: FC<AuthProviderProps> = ({ children }) => {
                 (async () => {
                     await signIn();
                 })();
-            } else if ((isLoading && authUser) || (isLoading && !session)) {
+            } else if (isLoading && session && connected) {
                 openModal({
-                    title: "Please wait...",
+                    title: "Loading your profile, please wait...",
                     body: <LoadingSpinner />,
                 });
-            } else if (connected && authUser) {
+            } else if (connected && session && userProfile) {
                 closeModal();
                 router.push("/dashboard");
             }
         });
-    }, [connected, authUser, isLoading]);
+    }, [connected, authUser, isLoading, userProfile]);
 
     const connectWallet = () => {
         if (!connected) {
@@ -65,36 +65,27 @@ export const AuthProvider: FC<AuthProviderProps> = ({ children }) => {
     };
 
     const signIn = async () => {
-        try {
-            if (!wallet.connected || !wallet.publicKey) {
-                throw new Error("Wallet not connected or public key not available.");
-            }
-            const address = wallet.publicKey.toBase58();
-
-            const message = `Sign in to Xzenlabs Contribute with wallet ${address} at ${new Date().toISOString()}`;
-            console.log("About To");
-            await supabase.auth.signInWithWeb3({
-                chain: "solana",
-                statement: message,
-                wallet: wallet as SolanaWallet,
-            });
-        } catch (error) {
-            console.error("Error signing in with Solana:", error);
-            throw error;
+        if (!wallet.connected || !wallet.publicKey) {
+            throw new Error("Wallet not connected or public key not available.");
         }
+        const address = wallet.publicKey.toBase58();
+
+        const message = `Sign in to Xzenlabs Contribute with wallet ${address} at ${new Date().toISOString()}`;
+        await supabase.auth.signInWithWeb3({
+            chain: "solana",
+            statement: message,
+            wallet: wallet as SolanaWallet,
+        });
     };
 
     const signOut = async () => {
         if (connected) {
-            console.log("Disconnecting wallet...");
             await disconnect();
         }
-        clearUser();
-        const { error } = await supabase.auth.signOut();
-        if (error) {
-            console.error("Error signing out:", error.message);
-            throw error;
-        }
+        await supabase.auth.signOut().then(() => {
+            clearUser();
+            router.push("/");
+        });
     };
 
     const value = useMemo(
@@ -116,3 +107,24 @@ export const useAuth = () => {
     }
     return context;
 };
+
+// Check for the initial session on app load
+const currentAuthUser = useUserStore.getState().authUser;
+
+supabase.auth.getSession().then(({ data: { session } }) => {
+    if (session) {
+        useUserStore.getState().setAuthUser(session.user);
+    }
+});
+
+// Listen for auth state changes (login, logout)
+supabase.auth.onAuthStateChange((event, session) => {
+    const user = session?.user || null;
+    if (user && user?.id !== currentAuthUser?.id) {
+        useUserStore.getState().setAuthUser(user);
+    }
+
+    if (event === "SIGNED_OUT") {
+        useUserStore.getState().clearUser();
+    }
+});

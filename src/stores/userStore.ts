@@ -1,6 +1,5 @@
 import { create } from "zustand";
 import { UserProfile } from "@/types/user";
-import { supabase } from "@/lib/supabaseClient";
 import { User as SupabaseUser } from "@supabase/supabase-js";
 import { getWalletBalance, getOrCreateUser } from "@/lib/userService";
 import Error from "next/error";
@@ -33,7 +32,6 @@ export const useUserStore = create<UserState & UserActions>((set, get) => ({
         set({ walletBalance: balance });
     },
     setAuthUser: (authUser: SupabaseUser | null) => {
-        console.log("Setting auth user:", authUser);
         set({ authUser });
         if (authUser) {
             get().fetchUserProfile(authUser.id);
@@ -48,7 +46,6 @@ export const useUserStore = create<UserState & UserActions>((set, get) => ({
         }
         set({ isLoading: true, error: null });
         try {
-            console.log("Fetching user profile for:", userId);
             const userProfile = await getOrCreateUser(state.authUser!);
 
             set({ userProfile, isLoading: false });
@@ -67,29 +64,3 @@ export const useUserStore = create<UserState & UserActions>((set, get) => ({
     },
     setIsLoading: (isLoading: boolean) => set({ isLoading }),
 }));
-
-// 1. Check for the initial session on app load
-supabase.auth.getSession().then(({ data: { session } }) => {
-    if (session) {
-        console.log("Initial session found:", session);
-        useUserStore.getState().setAuthUser(session.user);
-    }
-});
-
-// 2. Listen for auth state changes (login, logout)
-supabase.auth.onAuthStateChange((event, session) => {
-    const user = session?.user || null;
-    const currentAuthUser = useUserStore.getState().authUser;
-
-    // Only update if the user ID is different, to avoid unnecessary fetches
-    if (user && user?.id !== currentAuthUser?.id) {
-        console.log("New session found:", user);
-        useUserStore.getState().setAuthUser(user);
-    }
-
-    // Ensure user is cleared on SIGNED_OUT
-    if (event === "SIGNED_OUT") {
-        console.log("User signed out:", user);
-        useUserStore.getState().clearUser();
-    }
-});

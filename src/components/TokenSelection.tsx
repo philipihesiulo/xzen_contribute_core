@@ -1,3 +1,5 @@
+"use client";
+
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ExternalLink } from "lucide-react";
@@ -8,16 +10,37 @@ import { Token } from "@/types/token";
 import { useUserStore } from "@/stores/userStore";
 import { SelectTokenButton } from "./SelectTokenButton";
 import LoadingSpinner from "./LoadingSpinner";
+import { useIsMobile } from "@/hooks/useMobile";
+import { useEffect } from "react";
+import { useTokenDiscovery, useTokensMetadata } from "@/hooks/useTokenDiscovery";
 
-interface TokenSelectionProps {
-    isMobile: boolean;
-    tokens: Token[];
-    isLoading: boolean;
-    error: Error | null;
-}
-
-export const TokenSelection = ({ isMobile, tokens, isLoading, error }: TokenSelectionProps) => {
+export const TokenSelection = () => {
     const { userProfile } = useUserStore();
+
+    const isMobile = useIsMobile();
+    const { tokens, isLoading, error } = useTokenDiscovery();
+    const {
+        tokensMetadata,
+        isLoading: isMetadataLoading,
+        error: metadataError,
+    } = useTokensMetadata();
+
+    useEffect(() => {
+        console.log("[EFFECT] Tokens Metadata: ", tokensMetadata);
+        console.log("[EFFECT] Tokens: ", tokens);
+        if (!isMetadataLoading && !metadataError) {
+            // Merge tokens with their metadata
+            const updatedTokens: Token[] = [];
+            tokens?.forEach((token) => {
+                const metadata = tokensMetadata?.find((meta) => meta.mint === token.mint);
+                if (metadata) {
+                    updatedTokens.push(metadata);
+                } else {
+                    updatedTokens.push(token);
+                }
+            });
+        }
+    }, [tokens, tokensMetadata]);
 
     return (
         <div className="col-span-2">
@@ -64,9 +87,14 @@ export const TokenSelection = ({ isMobile, tokens, isLoading, error }: TokenSele
                                     </td>
                                 </tr>
                             ) : !tokens.length ? (
-                                <>
-                                    <p className="p-4 text-center">No tokens found.</p>
-                                </>
+                                <tr>
+                                    <td
+                                        colSpan={5}
+                                        className="p-4 text-center text-red-500">
+                                        No tokens found in your wallet. <br /> Connect a different
+                                        wallet and try again.
+                                    </td>
+                                </tr>
                             ) : (
                                 tokens?.map((token, index) => (
                                     <tr

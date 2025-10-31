@@ -2,7 +2,7 @@
 
 import { Home, Plus, Trophy, Users, User, Wallet } from "lucide-react";
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import {} from "next/navigation";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
@@ -23,16 +23,10 @@ interface SidebarProps {
 
 export function Sidebar({ onLinkClick }: SidebarProps) {
     const pathname = usePathname();
-    const router = useRouter();
 
     const { signOut } = useAuth();
     const handleSignOut = async () => {
-        try {
-            await signOut();
-            router.push("/");
-        } catch (error) {
-            console.error("Error during sign out:", error);
-        }
+        await signOut();
     };
 
     return (
