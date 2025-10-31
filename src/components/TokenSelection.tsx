@@ -127,11 +127,7 @@ export const TokenSelection = () => {
                                         </td>
                                         {isMobile && (
                                             <td className="p-4">
-                                                <Button
-                                                    size="sm"
-                                                    className="gradient-primary">
-                                                    Add
-                                                </Button>
+                                                <SelectTokenButton token={token} />
                                             </td>
                                         )}
                                         <td className="p-4 font-medium text-accent">
