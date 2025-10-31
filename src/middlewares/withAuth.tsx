@@ -7,12 +7,13 @@ import { useEffect, ComponentType } from "react";
 const withAuth = <P extends object>(WrappedComponent: ComponentType<P>) => {
     const WithAuthComponent = (props: P) => {
         //const { user, isLoading } = useAuth();
-        const { userProfile: user, isLoading } = useUserStore();
+        const { authUser: user, isLoading } = useUserStore();
 
         const router = useRouter();
 
         useEffect(() => {
             if (!user) {
+                console.log("No Aunthenticated User Found");
                 router.push("/");
             }
         }, [user, isLoading, router]);
