@@ -4,9 +4,9 @@ import { Card } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { ExternalLink, ChevronRight, Flame, Copy } from "lucide-react";
 import DashboardLayout from "../dashboard-layout";
-import { useAuth } from "@/providers/AuthProvider";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabaseClient";
+import { useUserStore } from "@/stores/userStore";
 
 const fetchContributions = async (userId: string) => {
     const { data, error } = await supabase
@@ -23,7 +23,7 @@ const fetchContributions = async (userId: string) => {
 };
 
 export default function Profile() {
-    const { user } = useAuth();
+    const { userProfile: user } = useUserStore();
     const { data: contributions, isLoading } = useQuery({
         queryKey: ["contributions", user?.id],
         queryFn: () => fetchContributions(user!.id),

@@ -6,11 +6,11 @@ import { Flame, Calendar, Award, Share2, ChevronDown } from "lucide-react";
 import Image from "next/image";
 import DashboardLayout from "../dashboard-layout";
 import { RecentContributions } from "@/components/RecentContributions";
-import { useUser } from "@/hooks/useUser";
+import { useUserStore } from "@/stores/userStore";
 import Link from "next/link";
 
 export default function Dashboard() {
-    const { user } = useUser();
+    const { userProfile: user } = useUserStore();
 
     const bonusProgress = user ? (user?.current_streak / 7) * 100 : 0;
 

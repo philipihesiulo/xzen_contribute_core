@@ -2,36 +2,17 @@
 
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
-import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { useAuth } from "../providers/AuthProvider";
-import { useEffect } from "react";
-import LoadingSpinner from "@/components/LoadingSpinner";
-import { useModalStore } from "@/stores/modalStore";
+import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
+import { useUserStore } from "@/stores/userStore";
 
 export default function Home() {
-    const router = useRouter();
-    const { signIn, isConnected, user } = useAuth();
-    const { openModal, closeModal } = useModalStore();
-
-    useEffect(() => {
-        if (isConnected && !user) {
-            openModal({
-                title: "Approve the wallet message to continue...",
-                body: <LoadingSpinner />,
-            });
-            (async () =>
-                await signIn().then(() => {
-                    closeModal();
-                    router.push("/dashboard");
-                }))();
-        } else if (user) {
-            router.push("/dashboard");
-        }
-    }, [isConnected, user, router]);
+    const { connectWallet, walletConnected: isConnected } = useAuth();
+    const { userProfile: user } = useUserStore();
 
     const handleConnectWallet = async () => {
-        await signIn();
+        await connectWallet();
     };
 
     return (
@@ -55,6 +36,9 @@ export default function Home() {
                         height={250}
                     />
                 </div>
+
+                <WalletMultiButton />
+
                 {/* Main heading */}
                 <h1 className="mb-6 text-4xl font-bold leading-tight tracking-tight md:text-6xl">
                     Turn your worthless Solana tokens into
