@@ -26,36 +26,36 @@ export const AuthProvider: FC<AuthProviderProps> = ({ children }) => {
     const wallet = useWallet();
     const { connected, disconnect } = wallet;
     const { setVisible } = useWalletModal();
-    const { authUser, userProfile, clearUser, isLoading } = useUserStore();
+    const { authUser, clearUser, isLoading } = useUserStore();
     const { openModal, closeModal } = useModalStore();
     const router = useRouter();
 
     useEffect(() => {
-        console.log("User Auth", authUser);
-        console.log("User Profile", userProfile);
-        console.log("Auth User", authUser);
-        console.log("Connected", connected);
-        if (connected && !authUser) {
-            openModal({
-                title: "Sign wallet",
-                body: (
-                    <>
-                        <p>Approve the wallet message to continue...</p>
-                    </>
-                ),
-            });
-            (async () => {
-                await signIn();
-            })();
-        } else if (isLoading && authUser) {
-            openModal({
-                title: "Please wait...",
-                body: <LoadingSpinner />,
-            });
-        } else if (connected && authUser) {
-            closeModal();
-            router.push("/dashboard");
-        }
+        supabase.auth.getSession().then(({ data: { session } }) => {
+            console.log("Session", session);
+
+            if (connected && !session) {
+                openModal({
+                    title: "Sign wallet",
+                    body: (
+                        <>
+                            <p>Approve the wallet message to continue...</p>
+                        </>
+                    ),
+                });
+                (async () => {
+                    await signIn();
+                })();
+            } else if ((isLoading && authUser) || (isLoading && !session)) {
+                openModal({
+                    title: "Please wait...",
+                    body: <LoadingSpinner />,
+                });
+            } else if (connected && authUser) {
+                closeModal();
+                router.push("/dashboard");
+            }
+        });
     }, [connected, authUser, isLoading]);
 
     const connectWallet = () => {
