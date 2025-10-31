@@ -26,7 +26,7 @@ export const AuthProvider: FC<AuthProviderProps> = ({ children }) => {
     const wallet = useWallet();
     const { connected, disconnect } = wallet;
     const { setVisible } = useWalletModal();
-    const { authUser, userProfile, clearUser } = useUserStore();
+    const { authUser, userProfile, clearUser, isLoading } = useUserStore();
     const { openModal, closeModal } = useModalStore();
     const router = useRouter();
 
@@ -37,17 +37,26 @@ export const AuthProvider: FC<AuthProviderProps> = ({ children }) => {
         console.log("Connected", connected);
         if (connected && !authUser) {
             openModal({
-                title: "Approve the wallet message to continue...",
-                body: <LoadingSpinner />,
+                title: "Sign wallet",
+                body: (
+                    <>
+                        <p>Approve the wallet message to continue...</p>
+                    </>
+                ),
             });
             (async () => {
                 await signIn();
             })();
+        } else if (isLoading && authUser) {
+            openModal({
+                title: "Please wait...",
+                body: <LoadingSpinner />,
+            });
         } else if (connected && authUser) {
             closeModal();
             router.push("/dashboard");
         }
-    }, [connected, authUser]);
+    }, [connected, authUser, isLoading]);
 
     const connectWallet = () => {
         if (!connected) {
