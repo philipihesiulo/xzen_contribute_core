@@ -9,6 +9,7 @@ import { useUserStore } from "@/stores/userStore";
 import LoadingSpinner from "@/components/LoadingSpinner";
 import { useModalStore } from "@/stores/modalStore";
 import { useRouter } from "next/navigation";
+import { resetAllStores } from "@/lib/utils/storeUtils";
 
 interface AuthContextType {
     connectWallet: () => void;
@@ -26,14 +27,34 @@ export const AuthProvider: FC<AuthProviderProps> = ({ children }) => {
     const wallet = useWallet();
     const { connected, disconnect } = wallet;
     const { setVisible } = useWalletModal();
-    const { authUser, clearUser, isLoading, userProfile } = useUserStore();
+    const { authUser, isLoading, userProfile } = useUserStore();
     const { openModal, closeModal } = useModalStore();
     const router = useRouter();
 
     useEffect(() => {
+        // Check for the initial session on app load
         supabase.auth.getSession().then(({ data: { session } }) => {
-            /* TODO: Handle a case when the user fails to  */
+            if (session) {
+                useUserStore.getState().setAuthUser(session.user);
+            }
+        });
 
+        // Listen for auth state changes (login, logout)
+        supabase.auth.onAuthStateChange((event, session) => {
+            const user = session?.user || null;
+            const currentAuthUser = useUserStore.getState().authUser;
+            if (user && user?.id !== currentAuthUser?.id) {
+                useUserStore.getState().setAuthUser(user);
+            }
+
+            if (event === "SIGNED_OUT") {
+                useUserStore.getState().reset();
+            }
+        });
+    }, []);
+
+    useEffect(() => {
+        supabase.auth.getSession().then(({ data: { session } }) => {
             if (connected && !session) {
                 openModal({
                     title: "Sign wallet",
@@ -83,7 +104,7 @@ export const AuthProvider: FC<AuthProviderProps> = ({ children }) => {
             await disconnect();
         }
         await supabase.auth.signOut().then(() => {
-            clearUser();
+            resetAllStores();
             router.push("/");
         });
     };
@@ -107,24 +128,3 @@ export const useAuth = () => {
     }
     return context;
 };
-
-// Check for the initial session on app load
-const currentAuthUser = useUserStore.getState().authUser;
-
-supabase.auth.getSession().then(({ data: { session } }) => {
-    if (session) {
-        useUserStore.getState().setAuthUser(session.user);
-    }
-});
-
-// Listen for auth state changes (login, logout)
-supabase.auth.onAuthStateChange((event, session) => {
-    const user = session?.user || null;
-    if (user && user?.id !== currentAuthUser?.id) {
-        useUserStore.getState().setAuthUser(user);
-    }
-
-    if (event === "SIGNED_OUT") {
-        useUserStore.getState().clearUser();
-    }
-});

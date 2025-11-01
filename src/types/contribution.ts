@@ -32,4 +32,5 @@ export interface ContributionStoreState {
         wallet: WalletContextState,
         selected: ContributionToken[]
     ) => void;
+    reset: () => void;
 }

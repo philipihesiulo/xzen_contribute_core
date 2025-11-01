@@ -1,9 +1,8 @@
 "use client";
 
 import { Card } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { ExternalLink } from "lucide-react";
-import { shortenAddress } from "@/lib/utils";
+import { shortenAddress } from "@/lib/utils/generalUtils";
 import Image from "next/image";
 import Link from "next/link";
 import { Token } from "@/types/token";

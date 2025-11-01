@@ -1,25 +1,7 @@
 import { create } from "zustand";
-import { UserProfile } from "@/types/user";
 import { User as SupabaseUser } from "@supabase/supabase-js";
 import { getWalletBalance, getOrCreateUser } from "@/lib/userService";
-import Error from "next/error";
-
-interface UserState {
-    walletBalance: number;
-    authUser: SupabaseUser | null;
-    userProfile: UserProfile | null;
-    error: Error | null;
-    isLoading: boolean;
-}
-
-interface UserActions {
-    setAuthUser: (authUser: SupabaseUser | null) => void;
-    fetchUserProfile: (userId: string) => void;
-    setError: (error: Error) => void;
-    setIsLoading: (isLoading: boolean) => void;
-    setWalletBalance: (walletAddress: string) => void;
-    clearUser: () => void;
-}
+import { UserState, UserActions } from "@/types/user";
 
 export const useUserStore = create<UserState & UserActions>((set, get) => ({
     walletBalance: 0,
@@ -53,7 +35,7 @@ export const useUserStore = create<UserState & UserActions>((set, get) => ({
             set({ error: error as Error, isLoading: false });
         }
     },
-    clearUser: () => {
+    reset: () => {
         set({
             walletBalance: 0,
             authUser: null,
@@ -62,5 +44,4 @@ export const useUserStore = create<UserState & UserActions>((set, get) => ({
             isLoading: false,
         });
     },
-    setIsLoading: (isLoading: boolean) => set({ isLoading }),
 }));
