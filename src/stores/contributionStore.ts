@@ -63,4 +63,13 @@ export const useContributionStore = create<ContributionStoreState>((set, get) =>
                 set({ error });
             });
     },
+    reset: () => {
+        set({
+            selected: [],
+            totalReward: 0,
+            status: STATUS.PENDING,
+            response: { message: "", pointsEarned: 0 },
+            error: null,
+        });
+    },
 }));

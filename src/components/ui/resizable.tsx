@@ -7,7 +7,7 @@ import {
     PanelResizeHandle,
 } from "react-resizable-panels";
 
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/utils/generalUtils";
 
 const ResizablePanelGroup = ({ className, ...props }: PanelGroupProps) => (
     <PanelGroup

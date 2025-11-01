@@ -6,7 +6,7 @@ import { usePathname } from "next/navigation";
 import {} from "next/navigation";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/utils/generalUtils";
 import { useAuth } from "@/providers/AuthProvider";
 
 const navigation = [

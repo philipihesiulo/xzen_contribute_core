@@ -1,5 +1,5 @@
 import { Wallet, Copy } from "lucide-react";
-import { shortenAddress } from "@/lib/utils";
+import { shortenAddress } from "@/lib/utils/generalUtils";
 import { useUserStore } from "@/stores/userStore";
 
 export function WalletBalance() {

@@ -1,3 +1,4 @@
+import { User as SupabaseUser } from "@supabase/supabase-js";
 export type UserProfile = {
     id: string;
     wallet_address: string;
@@ -13,3 +14,19 @@ export type UserProfile = {
     updated_at: string;
     wallet_balance?: number;
 };
+
+export interface UserState {
+    walletBalance: number;
+    authUser: SupabaseUser | null;
+    userProfile: UserProfile | null;
+    error: Error | null;
+    isLoading: boolean;
+}
+
+export interface UserActions {
+    setAuthUser: (authUser: SupabaseUser | null) => void;
+    fetchUserProfile: (userId: string) => void;
+    setError: (error: Error) => void;
+    setWalletBalance: (walletAddress: string) => void;
+    reset: () => void;
+}
